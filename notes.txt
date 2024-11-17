@@ -1,0 +1,22 @@
+p1: implement static table-based scheduler
+p2: validation/verification/use-case            ->   have examples to show that the scheduler works (imagine that the buttons are 
+                                                    supposed to be a sensor of a machine that gives the input to our program)
+
+
+every 100 ms (for example) there has to be a task that awakens the scheduler
+
+
+
+
+
+
+
+
+
+
+
+possibilities:
+we need a function to add a task to the system
+we need a function to start the scheduler and maybe stop it too
+a function to print the contents of the table
+
