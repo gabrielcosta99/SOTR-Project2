@@ -1,11 +1,17 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include<unistd.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <time.h>
+#include <sched.h> //sched_setscheduler
+
 #include "functions.h"
 
 // Inits the STBS system, including creating eventual system tasks, initializing variables, etc.
 
 // the "Task" structure is defined in "functions.h"
+#define TICK 20             // ms -> Tick is also a microcycle
+#define MACROCYLE 200       // 10 ticks
 
 typedef struct{
     int tick;
@@ -21,11 +27,10 @@ void STBS_Init(int tick_ms, int max_tasks){
     stb.tick = tick_ms; 
     stb.max_tasks = max_tasks;
 
-    // initialize the "task_table" and each task
     stb.task_table = malloc(max_tasks*sizeof(Task));
     for(int i = 0; i< max_tasks; i++){
         stb.task_table[i].id = -1;
-        stb.task_table[i].period = 0;
+        stb.task_table[i].ticks = 0;
         stb.task_table[i].next_activation = -1;
     }
     
@@ -40,12 +45,18 @@ void STBS_Start(){
         return;
     }
 
+    struct timespec ts, // thread next activation time (absolute)
+        ta, 		// activation time of current thread activation (absolute)
+        tit, 		// thread time from last execution,
+        ta_ant, 	// activation time of last instance (absolute),
+        tp; 		// Thread period
+
     // calculate the least common multiple of the tasks period (to get the "macro-cycle")
-    int periods[stb.num_tasks];
+    int task_ticks[stb.num_tasks];
     for(int i = 0; i< stb.num_tasks;i++){
-        periods[i] = stb.task_table[i].period;
+        task_ticks[i] = stb.task_table[i].ticks;
     }
-    stb.macroCycle = lcm_array(periods,stb.num_tasks);
+    stb.macroCycle = lcm_array(task_ticks,stb.num_tasks);
     printf("macroCycle: %d\n",stb.macroCycle);
 
     // schedule each task
@@ -55,20 +66,29 @@ void STBS_Start(){
     // }
     //      start by sorting the tasks by their period
     qsort(stb.task_table,stb.num_tasks,sizeof(Task),compare_tasks);
-
     printf("Started STBS\n");
+
+    /* Set absolute activation time of first instance */
+	tp.tv_nsec = TICK*1000000;
+	tp.tv_sec = 0;	
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	ts = TsAdd(ts,tp);	
     int current_tick = 0;
     while(1){
-        current_tick+=stb.tick;
+        printf("TICKKKKKK: %d\n",current_tick);
+        current_tick++;
         for (int i = 0; i < stb.num_tasks; i++) {
-            if (stb.task_table[i].id != -1 && current_tick == stb.task_table[i].next_activation) {
+            if (current_tick == stb.task_table[i].next_activation) {
                 // Activate task
-                stb.task_table[i].next_activation += stb.task_table[i].period;
+                stb.task_table[i].next_activation += stb.task_table[i].ticks;
 
-                // Invoke the task 
+                // Signal the task  
+                fun(stb.task_table[i].id); //TODO: DONT FORGET TO CHANGE THIS
             }
         }
-        usleep(stb.tick*1000);
+        clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME,&ts,NULL);
+        clock_gettime(CLOCK_MONOTONIC, &ta);
+        ts = TsAdd(ts,tp);
     }
 
 }
@@ -80,14 +100,13 @@ void STBS_Start(){
 
 //  Adds a task to the STBS scheduler, with a period of period_ticks. task_id is a suitable
 // identifier (its nature depends on the method used to control the activation of the tasks)
-void STBS_AddTask(int period_ticks, int task_id, void (*task_ptr)(int)){
+void STBS_AddTask(int ticks, int task_id){
     // leaving it like this for now because we might not need the list of tasks to NOT have a gap.
     for(int i = 0; i<stb.max_tasks;i++){
         if(stb.task_table[i].id == -1){
             stb.task_table[i].id = task_id;
-            stb.task_table[i].period = period_ticks;
-            stb.task_table[i].next_activation = period_ticks;
-            stb.task_table[i].task_ptr = task_ptr;
+            stb.task_table[i].ticks = ticks;
+            stb.task_table[i].next_activation = ticks;
             stb.num_tasks++;
             break;
         }
@@ -110,7 +129,7 @@ void STBS_RemoveTask(int task_id){
     }
     // If we arrived here, then we found the task. Now we "delete it"
     stb.task_table[i].id = -1;
-    stb.task_table[i].period = 0;
+    stb.task_table[i].ticks = 0;
     // if we remove a task from the middle of the list, we need to close the gap it creates
     for(int j = i; j<stb.num_tasks-1;j++){
         stb.task_table[j] = stb.task_table[j+1];
@@ -127,10 +146,10 @@ void STBS_RemoveTask(int task_id){
 
 
 int main(void){
-    STBS_Init(5,15);
-    STBS_AddTask(10,1,&fun);
-    STBS_AddTask(5,2,&fun);
-    STBS_AddTask(15,3,&fun);
+    STBS_Init(TICK,15);
+    STBS_AddTask(2,1);
+    STBS_AddTask(1,2);
+    STBS_AddTask(3,3);
     STBS_Start();
     // for(int i = 0; i<stb.num_tasks;i++){
     //     printf("task period: %d\n",stb.task_table[i].period);

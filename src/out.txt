@@ -2,619 +2,504 @@ Initialized STBS
 Added task with id: 1
 Added task with id: 2
 Added task with id: 3
-macroCycle: 30
+macroCycle: 6
 Started STBS
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 3
-here
 task: 2
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 3
-here
 task: 2
-here
 task: 1
-here
 task: 2
-here
 task: 2
-here
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
+task: 2
+task: 3
+task: 2
+task: 1
+task: 2
+task: 2
+task: 1
+task: 3
+task: 2
+task: 2
+task: 1
 ta

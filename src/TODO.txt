@@ -1,5 +1,5 @@
 [] Check if the STBS table of tasks will need to have no gap in the middle
-[] Passar de periodo para ticks
+[x] Passar de periodo para ticks
 [] Para invocar uma task, envia-se um sinal para acordar a task
 [] 
 []

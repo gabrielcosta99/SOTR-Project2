@@ -1,6 +1,10 @@
+#define NS_IN_SEC 1000000000L
+
+
+
 typedef struct {
     int id;
-    int period;
+    int ticks;
     int next_activation;
 } Task;
 
@@ -9,7 +13,7 @@ int compare_tasks(const void *a,const void *b){
     const Task *taskA = (const Task *)a;
     const Task *taskB = (const Task *)b;
 
-    return taskA->period - taskB->period; // Sort in ascending order of period
+    return taskA->ticks - taskB->ticks; // Sort in ascending order of period
 }
 
 int gcd(int a, int b) {
@@ -34,6 +38,30 @@ int lcm_array(int arr[], int n) {
     }
     return result;
 }
+
+
+
+// Adds two timespect variables
+struct  timespec  TsAdd(struct  timespec  ts1, struct  timespec  ts2){
+	
+	struct  timespec  tr;
+	
+	// Add the two timespec variables
+		tr.tv_sec = ts1.tv_sec + ts2.tv_sec ;
+		tr.tv_nsec = ts1.tv_nsec + ts2.tv_nsec ;
+	// Check for nsec overflow	
+	if (tr.tv_nsec >= NS_IN_SEC) {
+			tr.tv_sec++ ;
+		tr.tv_nsec = tr.tv_nsec - NS_IN_SEC ;
+		}
+
+	return (tr) ;
+}
+
+
+
+
+
 
 void fun(int a){
     printf("task: %d\n",a);
