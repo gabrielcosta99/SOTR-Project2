@@ -20,3 +20,11 @@ we need a function to add a task to the system
 we need a function to start the scheduler and maybe stop it too
 a function to print the contents of the table
 
+
+
+The macro-cycle can be used to reset the clock of the system, so we can prevent the overflow of the clock
+
+
+To schedule:
+    - create list of tasks, ordered by period
+    

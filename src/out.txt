@@ -1,0 +1,620 @@
+Initialized STBS
+Added task with id: 1
+Added task with id: 2
+Added task with id: 3
+macroCycle: 30
+Started STBS
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 3
+here
+task: 2
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 3
+here
+task: 2
+here
+task: 1
+here
+task: 2
+here
+task: 2
+here
+ta

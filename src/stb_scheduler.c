@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include<unistd.h>
 #include "functions.h"
 
 // Inits the STBS system, including creating eventual system tasks, initializing variables, etc.
@@ -31,6 +32,7 @@ void STBS_Init(int tick_ms, int max_tasks){
     printf("Initialized STBS\n");
 }
 
+// UNFINISHED
 // Starts the STBS scheduler
 void STBS_Start(){
     if(stb.num_tasks == 0){
@@ -55,6 +57,20 @@ void STBS_Start(){
     qsort(stb.task_table,stb.num_tasks,sizeof(Task),compare_tasks);
 
     printf("Started STBS\n");
+    int current_tick = 0;
+    while(1){
+        current_tick+=stb.tick;
+        for (int i = 0; i < stb.num_tasks; i++) {
+            if (stb.task_table[i].id != -1 && current_tick == stb.task_table[i].next_activation) {
+                // Activate task
+                stb.task_table[i].next_activation += stb.task_table[i].period;
+
+                // Invoke the task 
+            }
+        }
+        usleep(stb.tick*1000);
+    }
+
 }
 
 // Stops the STBS scheduler
@@ -64,12 +80,14 @@ void STBS_Start(){
 
 //  Adds a task to the STBS scheduler, with a period of period_ticks. task_id is a suitable
 // identifier (its nature depends on the method used to control the activation of the tasks)
-void STBS_AddTask(int period_ticks, int task_id){
+void STBS_AddTask(int period_ticks, int task_id, void (*task_ptr)(int)){
     // leaving it like this for now because we might not need the list of tasks to NOT have a gap.
     for(int i = 0; i<stb.max_tasks;i++){
         if(stb.task_table[i].id == -1){
             stb.task_table[i].id = task_id;
             stb.task_table[i].period = period_ticks;
+            stb.task_table[i].next_activation = period_ticks;
+            stb.task_table[i].task_ptr = task_ptr;
             stb.num_tasks++;
             break;
         }
@@ -110,16 +128,16 @@ void STBS_RemoveTask(int task_id){
 
 int main(void){
     STBS_Init(5,15);
-    STBS_AddTask(10,1);
-    STBS_AddTask(5,2);
-    STBS_AddTask(15,3);
+    STBS_AddTask(10,1,&fun);
+    STBS_AddTask(5,2,&fun);
+    STBS_AddTask(15,3,&fun);
     STBS_Start();
-    for(int i = 0; i<stb.num_tasks;i++){
-        printf("task period: %d\n",stb.task_table[i].period);
-    }
-    STBS_RemoveTask(5);
-    for(int i = 0; i<stb.num_tasks;i++){
-        printf("task period: %d\n",stb.task_table[i].period);
-    }
+    // for(int i = 0; i<stb.num_tasks;i++){
+    //     printf("task period: %d\n",stb.task_table[i].period);
+    // }
+    // STBS_RemoveTask(5);
+    // for(int i = 0; i<stb.num_tasks;i++){
+    //     printf("task period: %d\n",stb.task_table[i].period);
+    // }
     return 0;
 }

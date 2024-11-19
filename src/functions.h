@@ -34,3 +34,7 @@ int lcm_array(int arr[], int n) {
     }
     return result;
 }
+
+void fun(int a){
+    printf("task: %d\n",a);
+}
