@@ -3,9 +3,12 @@
 
 
 typedef struct {
-    int id;
-    int ticks;
-    int next_activation;
+    k_tid_t id;                      // Unique identifier for the task
+    int ticks;                   // Task's period in ticks (relative to the scheduler's tick)
+    int next_activation;         // Tick count for the next activation of the task
+    // struct k_thread thread;      // Zephyr thread object to manage the task's execution
+    // k_tid_t thread_id;           // Identifier for the thread
+    int priority;                // Priority level of the thread (lower values = higher priority in Zephyr)
 } Task;
 
 
@@ -39,30 +42,3 @@ int lcm_array(int arr[], int n) {
     return result;
 }
 
-
-
-// Adds two timespect variables
-struct  timespec  TsAdd(struct  timespec  ts1, struct  timespec  ts2){
-	
-	struct  timespec  tr;
-	
-	// Add the two timespec variables
-		tr.tv_sec = ts1.tv_sec + ts2.tv_sec ;
-		tr.tv_nsec = ts1.tv_nsec + ts2.tv_nsec ;
-	// Check for nsec overflow	
-	if (tr.tv_nsec >= NS_IN_SEC) {
-			tr.tv_sec++ ;
-		tr.tv_nsec = tr.tv_nsec - NS_IN_SEC ;
-		}
-
-	return (tr) ;
-}
-
-
-
-
-
-
-void fun(int a){
-    printf("task: %d\n",a);
-}
