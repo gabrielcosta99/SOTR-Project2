@@ -28,3 +28,18 @@ The macro-cycle can be used to reset the clock of the system, so we can prevent 
 To schedule:
     - create list of tasks, ordered by period
     
+
+How to schedule:
+    - save in each task the ticks in which they will be executed
+    or
+    - create a structure that has the tick and the tasks that will be executed in that tick 
+(also add the number of tasks that will be executed in that tick)
+
+    - the tasks have to be ordered by priority. If the priority is the same, order by period (aka num of ticks)
+
+ex: [[1],[1,0],[1,2],[1],[1,2,3]] -> 
+    1st tick: task 1; 
+    2nd tick: task 1 and 0; 
+    3rd tick: task 1 and 2; 
+    4th tick: task 1; 
+    5th tick: task 1, 2 and 3
