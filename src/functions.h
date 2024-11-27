@@ -10,6 +10,7 @@ typedef struct {
     // k_tid_t thread_id;           // Identifier for the thread
     int priority;                // Priority level of the thread (lower values = higher priority in Zephyr)
     int exec_time;              // execution time in ms
+    int to_be_executed;         // flag that says if the task was supposed to be executed in a previous tick, but it didnt have space available
 } Task;
 
 
@@ -21,7 +22,7 @@ int compare_tasks(const void *a,const void *b){
         return taskA->priority - taskB->priority;
 
     // If the priority is the same
-    return taskA->exec_time - taskB->exec_time; // Sort by execution time
+    return taskA->ticks - taskB->ticks; // Sort by period
 }
 
 int gcd(int a, int b) {

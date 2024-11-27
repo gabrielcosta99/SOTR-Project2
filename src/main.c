@@ -18,31 +18,40 @@
 #define TICK_MS 200          // Scheduler tick period in milliseconds
 #define MAX_TASKS 15
 
-extern const k_tid_t thread0,thread1,thread2;
+extern const k_tid_t thread0,thread1,thread2,thread3;
 
 void task0(void *argA, void *argB, void *argC) {
     // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
     while (1) {
-        printk("Task0 executing %d\n",thread0); // Simulate task behavior
         k_thread_suspend(thread0);
+        printk("Task0 executing %d\n",thread0); // Simulate task behavior
     }
 }
 
 void task1(void *argA, void *argB, void *argC) {
     // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
     while (1) {
+        k_thread_suspend(thread1);
         printk("Task1 executing %d\n",thread1); // Simulate task behavior
         // k_msleep(TICK_MS); // Simulate work
-        k_thread_suspend(thread1);
     }
 }
 
 void task2(void *argA, void *argB, void *argC) {
     // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
     while (1) {
+        k_thread_suspend(thread2);
         printk("Task2 executing %d\n",thread2); // Simulate task behavior
         // k_msleep(TICK_MS); // Simulate work
-        k_thread_suspend(thread2);
+    }
+}
+
+void task3(void *argA, void *argB, void *argC) {
+    // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
+    while (1) {
+        k_thread_suspend(thread3);
+        printk("Task3 executing %d\n",thread3); // Simulate task behavior
+        // k_msleep(TICK_MS); // Simulate work
     }
 }
 
@@ -81,6 +90,7 @@ void task2(void *argA, void *argB, void *argC) {
 K_THREAD_DEFINE(thread0 , 512, task0, NULL, NULL, NULL,5,0,0);
 K_THREAD_DEFINE(thread1, 512, task1, NULL, NULL, NULL,5,0,0);
 K_THREAD_DEFINE(thread2, 512, task2, NULL, NULL, NULL,5,0,0);
+K_THREAD_DEFINE(thread3, 512, task3, NULL, NULL, NULL,5,0,0);
 
 /**
  * Main function demonstrating the Static Table-Based Scheduler (STBS).
@@ -93,12 +103,18 @@ void main(void) {
 
     // Add tasks with different periods
     // STBS_AddTask(1, thread0, 1,40); // Task 1: Period = 1 ticks
-    // STBS_AddTask(2, thread1, 1,160); // Task 2: Period = 2 tick
     // STBS_AddTask(3, thread2, 1,120); // Task 3: Period = 3 ticks
-    STBS_AddTask(1, thread0, 1,20); // Task 1: Period = 1 ticks
-    STBS_AddTask(2, thread1, 1,20); // Task 2: Period = 2 tick
-    STBS_AddTask(3, thread2, 1,20); // Task 3: Period = 3 ticks
-    
+    // STBS_AddTask(2, thread1, 1,160); // Task 2: Period = 2 tick
+    // STBS_AddTask(2, thread3, 1,40); // Task 2: Period = 2 tick
+
+    // STBS_AddTask(1, thread0, 1,20); // Task 1: Period = 1 ticks
+    // STBS_AddTask(2, thread1, 1,20); // Task 2: Period = 2 tick
+    // STBS_AddTask(3, thread2, 1,20); // Task 3: Period = 3 ticks
+
+    STBS_AddTask(1, thread0, 10,40); // Task 1: Period = 1 ticks
+    STBS_AddTask(3, thread2, 5,50); // Task 3: Period = 3 ticks
+    STBS_AddTask(2, thread1, 7,60); // Task 2: Period = 2 tick
+    STBS_AddTask(2, thread3, 2,30); // Task 2: Period = 2 tick
 
     // Start the scheduler
     STBS_Start();

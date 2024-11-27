@@ -54,6 +54,7 @@ void STBS_AddTask(int ticks, k_tid_t task_id, int priority, int execution_time) 
             stbs.task_table[i].priority = priority;
             stbs.task_table[i].id = task_id;
             stbs.task_table[i].exec_time = execution_time;
+            stbs.task_table[i].to_be_executed = 0;
 
             // Allocate memory for thread stack
             //char *stack_area = k_malloc(K_THREAD_STACK_SIZEOF(512));
@@ -174,25 +175,30 @@ void STBS_Start() {
     printk("Starting table computation\n");
     // compute the next ticks
     for(int tick = 0; tick < stbs.macro_cycle;tick++){
-        printk("current_tick: %d\n",tick);
+        printk("\ncurrent_tick: %d\n",tick);
 
         for(int task_idx = 0; task_idx < stbs.num_tasks; task_idx++){
-            if(tick == 0 || tick % stbs.task_table[task_idx].ticks == 0 ){
-                if(stbs.task_table[task_idx].exec_time + entry[0].total_exec_time <= stbs.tick_ms){
+            if(tick == 0 || tick % stbs.task_table[task_idx].ticks == 0 || stbs.task_table[task_idx].to_be_executed){
+                printk("total_exec_time: %d, task_exec_time: %d\n",entry[tick].total_exec_time,stbs.task_table[task_idx].exec_time);
+                if(stbs.task_table[task_idx].exec_time + entry[tick].total_exec_time <= stbs.tick_ms){
                     entry[tick].task_id_list[entry[tick].num_tasks] = stbs.task_table[task_idx].id;
                     entry[tick].total_exec_time += stbs.task_table[task_idx].exec_time;
                     entry[tick].num_tasks++;
+                    stbs.task_table[task_idx].to_be_executed = 0;
+                    printk("Added task: %d to tick: %d\n",task_idx,tick);
                 }
                 else{
                     if(tick+1 > stbs.macro_cycle){
                         printk("System not schedulable\n");
                         exit(1);
                     }
-                    entry[tick+1].task_id_list[entry[tick+1].num_tasks] = stbs.task_table[task_idx].id;
-                    entry[tick+1].total_exec_time += stbs.task_table[task_idx].exec_time;
-                    entry[tick+1].num_tasks;
+                    stbs.task_table[task_idx].to_be_executed = 1;
+                    // entry[tick+1].task_id_list[entry[tick+1].num_tasks] = stbs.task_table[task_idx].id;
+                    // entry[tick+1].total_exec_time += stbs.task_table[task_idx].exec_time;
+                    // entry[tick+1].num_tasks++;
+                    // printk("Added task: %d to tick: %d\n",task_idx,tick+1);
+
                 }
-                printk("Added task: %d\n",task_idx);
             }
             
             
@@ -209,6 +215,7 @@ void STBS_Start() {
     printk("Starting STBS\n");
     int current_tick = 0; // Keeps track of the current tick count
     int count = 0; // Keeps track of the current tick count
+    k_msleep(20); // let the tasks arrive at the point where they suspend themselves
     while(1){
 
         // Log when a macrocycle completes
