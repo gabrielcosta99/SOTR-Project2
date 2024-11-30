@@ -250,7 +250,7 @@ void STBS_Start() {
         for(int i = 0; i <stbs.macro_cycle;i++){
             // Check each task for activation
             current_tick++;
-            printk("i: %d\n",i);
+            // printk("i: %d\n",i);
             for(int task_idx = 0; task_idx < entry[i].num_tasks; task_idx++){
                 k_tid_t task_id = entry[i].tasks[task_idx].id;
                 // printk("Activating Task %d\n", task_id);
@@ -287,10 +287,10 @@ void STBS_Start() {
 
         }
         current_tick = 0;
-        count++;
+        // count++;
         // k_msleep(5000);
-        if(count == 2)
-            break;
+        // if(count == 2)
+        //     break;
 
         
     }

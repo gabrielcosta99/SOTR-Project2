@@ -42,20 +42,43 @@ static void uart_cb(const struct device *dev, struct uart_event *evt, void *user
 	switch (evt->type) {
 
 	case UART_RX_RDY:
-		if ((evt->data.rx.len) == 1) {
-            printk("buffer state: %s\n",buffer); 
-            if(buffer_idx == 0 && evt->data.rx.buf[evt->data.rx.offset] == '!'){
+		// if ((evt->data.rx.len) == 1) {
+		for (size_t i = 0; i < evt->data.rx.len; i++) {
+			char received_char = evt->data.rx.buf[evt->data.rx.offset + i];
+            if(buffer_idx == 0 && received_char == '!'){
 				memset(buffer, 0, INPUT_BUFFER_SIZE);  
-                buffer[buffer_idx++] = evt->data.rx.buf[evt->data.rx.offset];
+                buffer[buffer_idx++] = received_char;
+				printk("%c",received_char);
             }
-            else if (buffer_idx>0 && evt->data.rx.buf[evt->data.rx.offset] == '#'){
-                buffer[buffer_idx++] = evt->data.rx.buf[evt->data.rx.offset];
-                printk("printing buffer: %s\n",buffer);
+            else if (buffer_idx>0 && received_char == '#'){
+                buffer[buffer_idx++] = received_char;
+				printk("#\n");
+				printk("%s\n",buffer);
+				if(buffer[1] == 'P'){	// PC -> Microcontroller communication
+                    if(buffer[2] == 'O' && buffer[5]=='#'){ // turn on a LED
+                        if(buffer[3] == '1'){	// LED 1
+                            if(buffer[4] == '1' ){ // turn on
+                                // gpio_pin_toggle_dt(&led0);
+                                // printk("toggling led0\n");
+                                gpio_pin_set_dt(&led0,1);
+                            } else if(buffer[4] == '0'){
+                                gpio_pin_set_dt(&led0,0);
+                            }
+                        } else if(buffer[3] == '2'){	// LED 2
+                            if(buffer[4] == '1') // turn on
+                                gpio_pin_toggle_dt(&led1);
+                        } else if(buffer[3] == '3'){	// LED 3
+                            if(buffer[4] == '1') // turn on
+                                gpio_pin_toggle_dt(&led2);
+                        }
+                        
+                    }
+                }
                 memset(buffer,0,INPUT_BUFFER_SIZE);
                 buffer_idx = 0;
-            }
-            else if (buffer_idx>0) {
-                buffer[buffer_idx++] = evt->data.rx.buf[evt->data.rx.offset];
+            }else if (buffer_idx>0) {
+                buffer[buffer_idx++] = received_char;
+				printk("%c",received_char);
             }
 			// if (evt->data.rx.buf[evt->data.rx.offset] == '1') {
 			// 	gpio_pin_toggle_dt(&led0);
@@ -66,6 +89,28 @@ static void uart_cb(const struct device *dev, struct uart_event *evt, void *user
 			// }
 		}
 		break;
+    case UART_TX_DONE:
+        // if(buffer[1] == 'P'){	// PC -> Microcontroller communication
+        //     if(buffer[2] == 'O' && buffer[5]=='#'){ // turn on a LED
+        //         if(buffer[3] == '1'){	// LED 1
+        //             if(buffer[4] == '1' ){ // turn on
+        //                 gpio_pin_toggle_dt(&led0);
+        //                 printk("toggling led0\n");
+        //             } 
+        //         } else if(buffer[3] == '2'){	// LED 2
+        //             if(buffer[4] == '1') // turn on
+        //                 gpio_pin_toggle_dt(&led1);
+        //         } else if(buffer[3] == '3'){	// LED 3
+        //             if(buffer[4] == '1') // turn on
+        //                 gpio_pin_toggle_dt(&led2);
+        //         }
+        //         memset(buffer,0,INPUT_BUFFER_SIZE);
+        //         buffer_idx = 0;
+        //     }
+        // }
+        
+        break;
+
 	case UART_RX_DISABLED:
 		uart_rx_enable(dev, rx_buf, sizeof rx_buf, RECEIVE_TIMEOUT);
 		break;
@@ -135,7 +180,7 @@ K_THREAD_DEFINE(thread3, 512, task3, NULL, NULL, NULL,5,0,0);
 void main(void) {
     printk("Zephyr STBS Example\n");
 
-
+    uint8_t msg[INPUT_BUFFER_SIZE];
     int ret;
 
 	/* Verify that the UART device is ready */
@@ -167,18 +212,26 @@ void main(void) {
 		return 1;
 	}
 	/* Send the data over UART by calling uart_tx() */
-	ret = uart_tx(uart, tx_buf, sizeof(tx_buf), SYS_FOREVER_US);
-	if (ret) {
-		return 1;
-	}
+	// ret = uart_tx(uart, tx_buf, sizeof(tx_buf), SYS_FOREVER_US);
+	// if (ret) {
+	// 	return 1;
+	// }
 	/* Start receiving by calling uart_rx_enable() and pass it the address of the receive buffer */
 	ret = uart_rx_enable(uart ,rx_buf,sizeof rx_buf,RECEIVE_TIMEOUT);
 	if (ret) {
 		return 1;
 	}
-	while (1) {
-		k_msleep(SLEEP_TIME_MS);
-	}
+	// while (1) {
+	// 	k_msleep(SLEEP_TIME_MS);
+        
+    //     // if(buffer_idx > 0) {
+    //     //     ret = uart_tx(uart, msg, strlen(msg), SYS_FOREVER_MS);
+    //     //     if (ret) {
+    //     //         printk("uart_tx() error. Error code:%d\n\r",ret);
+    //     //         return;
+    //     //     }
+    //     // }
+    // }
 
 
 
@@ -189,25 +242,25 @@ void main(void) {
 
 
 
-    // // Initialize the scheduler
-    // STBS_Init(TICK_MS,MAX_TASKS);
+    // Initialize the scheduler
+    STBS_Init(TICK_MS,MAX_TASKS);
 
-    // // Add tasks with different periods
-    // // STBS_AddTask(1, thread0, 1,40,"thread0"); // Task 1: Period = 1 ticks
-    // // STBS_AddTask(3, thread2, 1,120,"thread2"); // Task 3: Period = 3 ticks
-    // // STBS_AddTask(2, thread1, 1,160,"thread1"); // Task 2: Period = 2 tick
-    // // STBS_AddTask(2, thread3, 1,40,"thread3"); // Task 2: Period = 2 tick
+    // Add tasks with different periods
+    // STBS_AddTask(1, thread0, 1,40,"thread0"); // Task 1: Period = 1 ticks
+    // STBS_AddTask(3, thread2, 1,120,"thread2"); // Task 3: Period = 3 ticks
+    // STBS_AddTask(2, thread1, 1,160,"thread1"); // Task 2: Period = 2 tick
+    // STBS_AddTask(2, thread3, 1,40,"thread3"); // Task 2: Period = 2 tick
 
-    // STBS_AddTask(1, thread0, 1,20,"thread0"); // Task 1: Period = 1 ticks
-    // STBS_AddTask(2, thread1, 1,20,"thread1"); // Task 2: Period = 2 tick
-    // STBS_AddTask(3, thread2, 1,20,"thread2"); // Task 3: Period = 3 ticks
+    STBS_AddTask(1, thread0, 1,20,"thread0"); // Task 1: Period = 1 ticks
+    STBS_AddTask(2, thread1, 1,20,"thread1"); // Task 2: Period = 2 tick
+    STBS_AddTask(3, thread2, 1,20,"thread2"); // Task 3: Period = 3 ticks
 
-    // // STBS_AddTask(1, thread0, 10,40,"thread0"); // Task 1: Period = 1 ticks
-    // // STBS_AddTask(3, thread2, 5,50,"thread2"); // Task 3: Period = 3 ticks
-    // // STBS_AddTask(2, thread1, 7,60,"thread1"); // Task 2: Period = 2 tick
-    // // STBS_AddTask(2, thread3, 2,30,"thread3"); // Task 2: Period = 2 tick
+    // STBS_AddTask(1, thread0, 10,40,"thread0"); // Task 1: Period = 1 ticks
+    // STBS_AddTask(3, thread2, 5,50,"thread2"); // Task 3: Period = 3 ticks
+    // STBS_AddTask(2, thread1, 7,60,"thread1"); // Task 2: Period = 2 tick
+    // STBS_AddTask(2, thread3, 2,30,"thread3"); // Task 2: Period = 2 tick
 
-    // // STBS_print_content();
-    // // Start the scheduler
-    // STBS_Start();
+    // STBS_print_content();
+    // Start the scheduler
+    STBS_Start();
 }
