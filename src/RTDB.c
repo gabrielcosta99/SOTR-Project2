@@ -25,7 +25,7 @@ int RT_db_update(RT_db *db, char *command){
             break;
         }
     }
-    if (is_valid_command) {
+    if (!is_valid_command) {
 
         return 0;
     }else{
@@ -54,6 +54,7 @@ int RT_db_update(RT_db *db, char *command){
                 
             }
         return 1;
+        }
     }
 }
 

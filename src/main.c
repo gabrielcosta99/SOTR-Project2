@@ -18,6 +18,11 @@
 #include <zephyr/drivers/uart.h>
 #include "stb_scheduler.h"
 
+#include "RTDB.c"
+
+// GLOBAL
+
+RT_db rtdb;
 
 /************************************  UART  ***********************************/
 #define SLEEP_TIME_MS 1000
@@ -52,38 +57,12 @@ static void uart_cb(const struct device *dev, struct uart_event *evt, void *user
             }
             else if (buffer_idx>0 && received_char == '#'){
                 buffer[buffer_idx++] = received_char;
-				printk("#\n");
-				// printk("%s\n",buffer);
-				if(buffer[1] == 'P'){	// PC -> Microcontroller communication
-                    if(buffer[2] == 'O' && buffer[5]=='#'){ // turn on a LED
-                        if(buffer[3] == '1'){	// LED 1
-                            if(buffer[4] == '1' ){ // turn on
-                                // gpio_pin_toggle_dt(&led0);
-                                // printk("toggling led0\n");
-                                gpio_pin_set_dt(&led0,1);
-                            } else if(buffer[4] == '0'){
-                                gpio_pin_set_dt(&led0,0);
-                            }
-                        } else if(buffer[3] == '2'){	// LED 2
-                            if(buffer[4] == '1' ){ // turn on
-                                // gpio_pin_toggle_dt(&led0);
-                                // printk("toggling led0\n");
-                                gpio_pin_set_dt(&led1,1);
-                            } else if(buffer[4] == '0'){
-                                gpio_pin_set_dt(&led1,0);
-                            }
-                        } else if(buffer[3] == '3'){	// LED 3
-                            if(buffer[4] == '1' ){ // turn on
-                                // gpio_pin_toggle_dt(&led0);
-                                // printk("toggling led0\n");
-                                gpio_pin_set_dt(&led2,1);
-                            } else if(buffer[4] == '0'){
-                                gpio_pin_set_dt(&led2,0);
-                            }
-                            
-                        }
-                        
-                    }
+                int result = RT_db_update(&rtdb,buffer);
+                if(result == 1){
+                    printk("YAAAAAAY\n");
+                }
+                else{
+                    printk("NAAAAAAH\n");
                 }
                 memset(buffer,0,INPUT_BUFFER_SIZE);
                 buffer_idx = 0;
@@ -146,6 +125,11 @@ void task0(void *argA, void *argB, void *argC) {
     // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
     while (1) {
         k_thread_suspend(thread0);
+        gpio_pin_set_dt(&led0,rtdb.led0);
+        gpio_pin_set_dt(&led1,rtdb.led1);
+        gpio_pin_set_dt(&led2,rtdb.led2);
+        // RT_db_print(&rtdb);
+        // gpio_pin_set_dt(&led3,rtdb.led3);
         // printk("Task0 executing %d\n",thread0); // Simulate task behavior
     }
 }
@@ -249,7 +233,7 @@ void main(void) {
 
 
 
-
+    RT_db_init(&rtdb);
 
 
 
