@@ -18,7 +18,7 @@
 #include <zephyr/drivers/uart.h>
 #include "stb_scheduler.h"
 
-#include "RTDB.c"
+#include "../implementations/RTDB.c"
 
 // GLOBAL
 
@@ -30,9 +30,22 @@ RT_db rtdb;
 #define RECEIVE_TIMEOUT 100
 #define INPUT_BUFFER_SIZE 20
 
+
+
+
+// LEDS
 static const struct gpio_dt_spec led0 = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
 static const struct gpio_dt_spec led1 = GPIO_DT_SPEC_GET(DT_ALIAS(led1), gpios);
 static const struct gpio_dt_spec led2 = GPIO_DT_SPEC_GET(DT_ALIAS(led2), gpios);
+static const struct gpio_dt_spec led3 = GPIO_DT_SPEC_GET(DT_ALIAS(led3), gpios);
+
+// BUTTONS
+static const struct gpio_dt_spec button0 = GPIO_DT_SPEC_GET(DT_ALIAS(sw0), gpios);
+static const struct gpio_dt_spec button1 = GPIO_DT_SPEC_GET(DT_ALIAS(sw1), gpios);
+static const struct gpio_dt_spec button2 = GPIO_DT_SPEC_GET(DT_ALIAS(sw2), gpios);
+static const struct gpio_dt_spec button3 = GPIO_DT_SPEC_GET(DT_ALIAS(sw3), gpios);
+
+
 
 const struct device *uart= DEVICE_DT_GET(DT_NODELABEL(uart0));
 
@@ -70,13 +83,6 @@ static void uart_cb(const struct device *dev, struct uart_event *evt, void *user
                 buffer[buffer_idx++] = received_char;
 				printk("%c",received_char);
             }
-			// if (evt->data.rx.buf[evt->data.rx.offset] == '1') {
-			// 	gpio_pin_toggle_dt(&led0);
-			// } else if (evt->data.rx.buf[evt->data.rx.offset] == '2') {
-			// 	gpio_pin_toggle_dt(&led1);
-			// } else if (evt->data.rx.buf[evt->data.rx.offset] == '3') {
-			// 	gpio_pin_toggle_dt(&led2);
-			// }
 		}
 		break;
     case UART_TX_DONE:
@@ -128,6 +134,7 @@ void task0(void *argA, void *argB, void *argC) {
         gpio_pin_set_dt(&led0,rtdb.led0);
         gpio_pin_set_dt(&led1,rtdb.led1);
         gpio_pin_set_dt(&led2,rtdb.led2);
+        gpio_pin_set_dt(&led3,rtdb.led3);
         // RT_db_print(&rtdb);
         // gpio_pin_set_dt(&led3,rtdb.led3);
         // printk("Task0 executing %d\n",thread0); // Simulate task behavior
@@ -136,9 +143,39 @@ void task0(void *argA, void *argB, void *argC) {
 
 void task1(void *argA, void *argB, void *argC) {
     // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
+    static int prev_button0 = 0;
+    static int prev_button1 = 0;
+    static int prev_button2 = 0;
+    static int prev_button3 = 0;
     while (1) {
         k_thread_suspend(thread1);
-        // printk("Task1 executing %d\n",thread1); // Simulate task behavior
+        
+        rtdb.button0 = gpio_pin_get_dt(&button0); // Read button0 state
+        rtdb.button1 = gpio_pin_get_dt(&button1); // Read button1 state
+        rtdb.button2 = gpio_pin_get_dt(&button2); // Read button2 state
+        rtdb.button3 = gpio_pin_get_dt(&button3); // Read button3 state
+        
+
+        // based on the button state,change the led state once
+        if(rtdb.button0 == 1 && prev_button0 == 0){
+            rtdb.led0 = !rtdb.led0;
+        }
+        if(rtdb.button1 == 1 && prev_button1 == 0){
+            rtdb.led1 = !rtdb.led1;
+        }
+        if(rtdb.button2 == 1 && prev_button2 == 0){
+            rtdb.led2 = !rtdb.led2;
+        }
+        if(rtdb.button3 == 1 && prev_button3 == 0){
+            rtdb.led3 = !rtdb.led3;
+        }
+
+        prev_button0 = rtdb.button0;
+        prev_button1 = rtdb.button1;
+        prev_button2 = rtdb.button2;
+        prev_button3 = rtdb.button3;
+        
+
         // k_msleep(TICK_MS); // Simulate work
     }
 }
@@ -147,7 +184,10 @@ void task2(void *argA, void *argB, void *argC) {
     // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
     while (1) {
         k_thread_suspend(thread2);
-        // printk("Task2 executing %d\n",thread2); // Simulate task behavior
+        
+
+
+
         // k_msleep(TICK_MS); // Simulate work
     }
 }
@@ -156,7 +196,7 @@ void task3(void *argA, void *argB, void *argC) {
     // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
     while (1) {
         k_thread_suspend(thread3);
-        printk("Task3 executing %d\n",thread3); // Simulate task behavior
+        //printk("Task3 executing %d\n",thread3); // Simulate task behavior
         // k_msleep(TICK_MS); // Simulate work
     }
 }
@@ -201,6 +241,33 @@ void main(void) {
 	if (ret < 0) {
 		return 1 ;
 	}
+    ret = gpio_pin_configure_dt(&led3, GPIO_OUTPUT_ACTIVE);
+    if (ret < 0) {
+        return 1 ;
+    }
+
+    /* Configure the GPIOs of the buttons */
+    ret = gpio_pin_configure_dt(&button0, GPIO_INPUT);
+    if (ret < 0) {
+        return 1 ;
+    }
+
+    ret = gpio_pin_configure_dt(&button1, GPIO_INPUT);
+    if (ret < 0) {
+        return 1 ;
+    }
+
+    ret = gpio_pin_configure_dt(&button2, GPIO_INPUT);
+    if (ret < 0) {
+        return 1 ;
+    }
+
+    ret = gpio_pin_configure_dt(&button3, GPIO_INPUT);
+    if (ret < 0) {
+        return 1 ;
+    }
+
+
 	/* Register the UART callback function */
 	ret = uart_callback_set(uart, uart_cb, NULL);
 	if (ret) {
@@ -216,21 +283,6 @@ void main(void) {
 	if (ret) {
 		return 1;
 	}
-	// while (1) {
-	// 	k_msleep(SLEEP_TIME_MS);
-        
-    //     // if(buffer_idx > 0) {
-    //     //     ret = uart_tx(uart, msg, strlen(msg), SYS_FOREVER_MS);
-    //     //     if (ret) {
-    //     //         printk("uart_tx() error. Error code:%d\n\r",ret);
-    //     //         return;
-    //     //     }
-    //     // }
-    // }
-
-
-
-
 
 
     RT_db_init(&rtdb);

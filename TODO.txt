@@ -1,10 +1,9 @@
-[] Check if the STBS table of tasks will need to have no gap in the middle
 [x] Passar de periodo para ticks
-[] Para invocar uma task, envia-se um sinal para acordar a task
+[x] Para invocar uma task, envia-se um sinal para acordar a task
 [x] Traduzir as funcionalidades do STBS para o kernel do zephyr
-[] Fazer o scheduler tendo em conta as prioridades e os tempos de execução
-[]
-[]
+[x] Fazer o scheduler tendo em conta as prioridades e os tempos de execução
+[x] Buttons
+[] Comunição UART->PC
 []
 []
 []
