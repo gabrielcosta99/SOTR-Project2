@@ -15,8 +15,8 @@ typedef struct {
     int priority;                // Priority level of the thread (lower values = higher priority in Zephyr)
     int exec_time;              // execution time in ms
     int to_be_executed;         // flag that says if the task was supposed to be executed in a previous tick, but it didnt have space available
+    char *name;
 } Task;
-
 
 int compare_tasks(const void *a,const void *b);
 int gcd(int a, int b);

@@ -1,11 +1,16 @@
-#include "../include/functions.h"
+#include "../definitions/functions.h"
 
 
-int compare_tasks(const void *a, const void *b){
+
+int compare_tasks(const void *a,const void *b){
     const Task *taskA = (const Task *)a;
     const Task *taskB = (const Task *)b;
 
-    return taskA->ticks - taskB->ticks; // Sort in ascending order of period
+    if(taskA->priority != taskB->priority)  // Sort by priority
+        return taskA->priority - taskB->priority;
+
+    // If the priority is the same
+    return taskA->ticks - taskB->ticks; // Sort by period
 }
 
 int gcd(int a, int b) {
@@ -30,5 +35,6 @@ int lcm_array(int arr[], int n) {
     }
     return result;
 }
+
 
 

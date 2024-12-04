@@ -16,13 +16,15 @@ typedef struct {
 
 typedef struct{
     // int tick;               // current tick
-    k_tid_t *task_id_list;  // ids of the tasks that will execute in this tick
+    Task *tasks;  // ids of the tasks that will execute in this tick
     int num_tasks;          // number of tasks to execute in this tick
     int total_exec_time;    // total time it takes for the tasks to execute
 }scheduler_table_entry;
 
+
 void STBS_Init(int tick_ms, int max_tasks);
-void STBS_AddTask(int ticks, k_tid_t task_id, int priority);
+void STBS_AddTask(int ticks, k_tid_t task_id, int priority, int execution_time, char *name);
+void STBS_print_content();
 void STBS_Start();
 
 #endif

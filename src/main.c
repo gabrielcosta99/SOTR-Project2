@@ -16,8 +16,10 @@
 #include <zephyr/devicetree.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/uart.h>
-#include "stb_scheduler.h"
 
+
+
+#include "../implementations/stb_scheduler.c"
 #include "../implementations/RTDB.c"
 
 // GLOBAL
@@ -174,7 +176,7 @@ void task1(void *argA, void *argB, void *argC) {
         prev_button1 = rtdb.button1;
         prev_button2 = rtdb.button2;
         prev_button3 = rtdb.button3;
-        
+
 
         // k_msleep(TICK_MS); // Simulate work
     }
