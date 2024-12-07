@@ -18,9 +18,10 @@
 #include <zephyr/drivers/uart.h>
 
 
-
+// helper functions
 #include "../implementations/stb_scheduler.c"
 #include "../implementations/RTDB.c"
+#include "../definitions/frames.h"
 
 // GLOBAL
 
@@ -51,72 +52,213 @@ static const struct gpio_dt_spec button3 = GPIO_DT_SPEC_GET(DT_ALIAS(sw3), gpios
 
 const struct device *uart= DEVICE_DT_GET(DT_NODELABEL(uart0));
 
+/************************** FRAME PROCESSING ******************************/
+
+/**
+ * Process a frame received over UART.
+ * @param frame Frame to process
+ * @param frame_length Length of the frame
+ */
+void process_frame(const char *frame, int frame_length, int checksum) {
+    // Validate frame structure
+    if (frame[0] != '!' || frame[frame_length - 1] != '#') {
+        send_ack('4'); // Frame structure error
+        return;
+    }
+
+    // Extract command and payload
+    char device_id = frame[1];
+    char command = frame[2];
+    const char *payload = &frame[3];
+
+    // Calculate and validate checksum!
+    int received_checksum = checksum;
+    //printk("Received checksum: %d\n", received_checksum);
+    //printk("Calculated checksum: %d\n", calculate_checksum(frame, frame_length - 1));
+    if (calculate_checksum(frame, frame_length - 1) != received_checksum) {
+        send_ack('3'); // Checksum error
+        return;
+    }
+
+    // Process command
+    switch (command) {
+    case 'O': // Set individual LED
+        if (payload[0] >= '1' && payload[0] <= '4' && 
+            (payload[1] == '0' || payload[1] == '1')) {
+            set_led(payload[0] - '1', payload[1] - '0');
+            send_ack('1'); // Acknowledge success
+        } else {
+            send_ack('4'); // Invalid payload
+        }
+        break;
+
+    case 'A': // Set all LEDs (atomic operation)
+        if (strlen(payload) >= 4 && validate_led_states(payload)) {
+            for (int i = 0; i < 4; i++) {
+                set_led(i, payload[i] - '0');
+            }
+            send_ack('1'); // Acknowledge success
+        } else {
+            send_ack('4'); // Invalid payload
+        }
+        break;
+
+    case 'I': // Read digital inputs
+        send_inputs();
+        break;
+
+    case 'E': // Read digital outputs
+        send_outputs();
+        break;
+
+    default:
+        send_ack('2'); // Unknown command
+        break;
+    }
+}
+
+/**
+ * Calculate the checksum of a frame.
+ * The checksum is the sum of all bytes in the frame, excluding the checksum itself.
+ * @param frame Frame to calculate checksum for
+ * @param length Length of the frame
+ * @return Checksum of the frame
+ */
+int calculate_checksum(const char *frame, int length) {
+    int checksum = 0;
+    for (int i = 1; i < length; i++) {
+        checksum += frame[i];
+    }
+    return checksum % 1000; // Return last 3 digits
+}
+
+/**
+ * Send an acknowledgment frame over UART.
+ * @param error_code Error code to send in the acknowledgment frame
+ */
+void send_ack(char error_code) {
+    char ack_frame[] = "!MZO0####";
+    
+    ack_frame[4] = error_code; // Error code
+    int checksum = calculate_checksum(ack_frame, sizeof(ack_frame) - 4);
+    //printk("Checksum: %d\n", checksum);
+    ack_frame[5] = '0' + (checksum / 100); // Hundreds place
+    ack_frame[6] = '0' + ((checksum / 10) % 10); // Tens place
+    ack_frame[7] = '0' + (checksum % 10); // Units place
+
+    uart_tx(uart, ack_frame, sizeof(ack_frame), SYS_FOREVER_MS);
+}
+
+/**
+ * Set the state of an LED.
+ * @param led_index Index of the LED (0-3)
+ * @param value New state of the LED (0 or 1)
+ */
+void set_led(int led_index, int value) {
+    switch (led_index) {
+    case 0: rtdb.led0 = value; break;
+    case 1: rtdb.led1 = value; break;
+    case 2: rtdb.led2 = value; break;
+    case 3: rtdb.led3 = value; break;
+    default: break;
+    }
+}
+
+/**
+ * Validate the payload of an "A" command.
+ * The payload must be a 4-character string containing only '0' and '1' characters.
+ */
+bool validate_led_states(const char *payload) {
+    for (int i = 0; i < 4; i++) {
+        if (payload[i] != '0' && payload[i] != '1') {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * Send the current state of the buttons over UART.
+ */
+void send_inputs() {
+    char input_frame[] = "!Mi0000####";
+    input_frame[3] = '0' + rtdb.button0;
+    input_frame[4] = '0' + rtdb.button1;
+    input_frame[5] = '0' + rtdb.button2;
+    input_frame[6] = '0' + rtdb.button3;
+
+    // Update checksum
+    int checksum = calculate_checksum(input_frame, sizeof(input_frame) - 4);
+    input_frame[7] = '0' + (checksum / 100); // Hundreds place
+    input_frame[8] = '0' + ((checksum / 10) % 10); // Tens place
+    input_frame[9] = '0' + (checksum % 10); // Units place
+
+    uart_tx(uart, input_frame, sizeof(input_frame), SYS_FOREVER_MS);
+}
+
+/**
+ * Send the current state of the LEDs over UART.
+ */
+void send_outputs() {
+    char output_frame[] = "!Me0000####";
+    output_frame[3] = '0' + rtdb.led0;
+    output_frame[4] = '0' + rtdb.led1;
+    output_frame[5] = '0' + rtdb.led2;
+    output_frame[6] = '0' + rtdb.led3;
+
+    // Update checksum
+    int checksum = calculate_checksum(output_frame, sizeof(output_frame) - 4);
+    output_frame[7] = '0' + (checksum / 100); // Hundreds place
+    output_frame[8] = '0' + ((checksum / 10) % 10); // Tens place
+    output_frame[9] = '0' + (checksum % 10); // Units place
+
+    uart_tx(uart, output_frame, sizeof(output_frame), SYS_FOREVER_MS);
+}
+
+
+/************************** UART ******************************/
+
 static uint8_t tx_buf[] =   {"nRF Connect SDK Fundamentals Course\r\n"
                              "Press 1-3 on your keyboard to toggle LEDS 1-3 on your development kit\r\n"};
 
 static uint8_t rx_buf[RECEIVE_BUFF_SIZE] = {0};
 static char buffer[INPUT_BUFFER_SIZE];
 static int buffer_idx = 0;
-static void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data)
-{
-	switch (evt->type) {
+static void uart_cb(const struct device *dev, struct uart_event *evt, void *user_data) {
+    static char frame_buffer[INPUT_BUFFER_SIZE] = {0}; // Frame buffer
+    static int frame_idx = 0;
 
-	case UART_RX_RDY:
-		// if ((evt->data.rx.len) == 1) {
-		for (size_t i = 0; i < evt->data.rx.len; i++) {
-			char received_char = evt->data.rx.buf[evt->data.rx.offset + i];
-            if(buffer_idx == 0 && received_char == '!'){
-				memset(buffer, 0, INPUT_BUFFER_SIZE);  
-                buffer[buffer_idx++] = received_char;
-				printk("%c",received_char);
+    switch (evt->type) {
+    case UART_RX_RDY:
+        for (size_t i = 0; i < evt->data.rx.len; i++) {
+            char received_char = evt->data.rx.buf[evt->data.rx.offset + i];
+            if (buffer_idx == 0 && received_char == '!') { // Start of frame
+                frame_idx = 0;
+                memset(frame_buffer, 0, INPUT_BUFFER_SIZE);
+                //printk("%c", received_char);
             }
-            else if (buffer_idx>0 && received_char == '#'){
-                buffer[buffer_idx++] = received_char;
-                int result = RT_db_update(&rtdb,buffer);
-                if(result == 1){
-                    printk("YAAAAAAY\n");
-                }
-                else{
-                    printk("NAAAAAAH\n");
-                }
-                memset(buffer,0,INPUT_BUFFER_SIZE);
-                buffer_idx = 0;
-            }else if (buffer_idx>0) {
-                buffer[buffer_idx++] = received_char;
-				printk("%c",received_char);
+            printk("%c", received_char);
+            frame_buffer[frame_idx++] = received_char;
+            if (received_char == '#' && frame_idx > 1) { // End of frame
+                printk("\n");
+                // put the checksum in the buffer before the '#'
+                int checksum = calculate_checksum(frame_buffer, frame_idx - 1);
+                process_frame(frame_buffer, frame_idx, checksum); // Process the frame
+                frame_idx = 0;
             }
-		}
-		break;
-    case UART_TX_DONE:
-        // if(buffer[1] == 'P'){	// PC -> Microcontroller communication
-        //     if(buffer[2] == 'O' && buffer[5]=='#'){ // turn on a LED
-        //         if(buffer[3] == '1'){	// LED 1
-        //             if(buffer[4] == '1' ){ // turn on
-        //                 gpio_pin_toggle_dt(&led0);
-        //                 printk("toggling led0\n");
-        //             } 
-        //         } else if(buffer[3] == '2'){	// LED 2
-        //             if(buffer[4] == '1') // turn on
-        //                 gpio_pin_toggle_dt(&led1);
-        //         } else if(buffer[3] == '3'){	// LED 3
-        //             if(buffer[4] == '1') // turn on
-        //                 gpio_pin_toggle_dt(&led2);
-        //         }
-        //         memset(buffer,0,INPUT_BUFFER_SIZE);
-        //         buffer_idx = 0;
-        //     }
-        // }
-        
+        }
         break;
 
-	case UART_RX_DISABLED:
-		uart_rx_enable(dev, rx_buf, sizeof rx_buf, RECEIVE_TIMEOUT);
-		break;
+    case UART_RX_DISABLED:
+        uart_rx_enable(dev, rx_buf, sizeof(rx_buf), RECEIVE_TIMEOUT);
+        break;
 
-	default:
-		break;
-	}
+    default:
+        break;
+    }
 }
+
+
 
 
 
@@ -129,6 +271,11 @@ static void uart_cb(const struct device *dev, struct uart_event *evt, void *user
 
 extern const k_tid_t thread0,thread1,thread2,thread3;
 
+
+/**
+ * Task 0: Periodic task with period 1 tick
+ * this task is responsible for reading the button states and updating the led states
+ */
 void task0(void *argA, void *argB, void *argC) {
     // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
     while (1) {
@@ -137,12 +284,22 @@ void task0(void *argA, void *argB, void *argC) {
         gpio_pin_set_dt(&led1,rtdb.led1);
         gpio_pin_set_dt(&led2,rtdb.led2);
         gpio_pin_set_dt(&led3,rtdb.led3);
+
+        rtdb.button0 = gpio_pin_get_dt(&button0); // Read button0 state
+        rtdb.button1 = gpio_pin_get_dt(&button1); // Read button1 state
+        rtdb.button2 = gpio_pin_get_dt(&button2); // Read button2 state
+        rtdb.button3 = gpio_pin_get_dt(&button3); // Read button3 state
         // RT_db_print(&rtdb);
         // gpio_pin_set_dt(&led3,rtdb.led3);
         // printk("Task0 executing %d\n",thread0); // Simulate task behavior
     }
 }
 
+
+/**
+ * Task 1: Periodic task with period 2 ticks
+ * this task is responsible for updating the led states based on the button states
+ */
 void task1(void *argA, void *argB, void *argC) {
     // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
     static int prev_button0 = 0;
@@ -152,12 +309,6 @@ void task1(void *argA, void *argB, void *argC) {
     while (1) {
         k_thread_suspend(thread1);
         
-        rtdb.button0 = gpio_pin_get_dt(&button0); // Read button0 state
-        rtdb.button1 = gpio_pin_get_dt(&button1); // Read button1 state
-        rtdb.button2 = gpio_pin_get_dt(&button2); // Read button2 state
-        rtdb.button3 = gpio_pin_get_dt(&button3); // Read button3 state
-        
-
         // based on the button state,change the led state once
         if(rtdb.button0 == 1 && prev_button0 == 0){
             rtdb.led0 = !rtdb.led0;

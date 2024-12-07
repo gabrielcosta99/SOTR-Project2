@@ -1,3 +1,5 @@
+#ifndef RTDB_H
+#define RTDB_H
 
 // realtime database
 
@@ -23,3 +25,4 @@ void RT_db_init(RT_db *db);
 int RT_db_update(RT_db *db, char* command);
 void RT_db_print(RT_db *db);
 
+#endif // RTDB_H
