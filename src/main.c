@@ -82,7 +82,7 @@ void process_frame(const char *frame, int frame_length, int checksum) {
     // Calculate and validate checksum!
     int received_checksum = checksum;
     //printk("Received checksum: %d\n", received_checksum);
-    printk("Received checksum: %d  Calculated checksum: %d\n", received_checksum,calculate_checksum(frame, frame_length - 1));
+    // printk("Received checksum: %d  Calculated checksum: %d\n", received_checksum,calculate_checksum(frame, frame_length - 1));
     if (calculate_checksum(frame, frame_length - 1) != received_checksum) {
         send_ack('3'); // Checksum error
         return;
@@ -91,7 +91,8 @@ void process_frame(const char *frame, int frame_length, int checksum) {
     // Process command
     switch (command) {
     case 'O': // Set individual LED
-        if (payload[0] >= '1' && payload[0] <= '4' && 
+        if (strlen(payload) == 3 &&
+            payload[0] >= '1' && payload[0] <= '4' && 
             (payload[1] == '0' || payload[1] == '1')) {
             set_led(payload[0] - '1', payload[1] - '0');
             send_ack('1'); // Acknowledge success
@@ -113,11 +114,17 @@ void process_frame(const char *frame, int frame_length, int checksum) {
         break;
 
     case 'I': // Read digital inputs
-        send_inputs();
+        if (strlen(payload)  == 1)
+            send_inputs();
+        else
+            send_ack('4'); // Invalid payload
         break;
 
     case 'E': // Read digital outputs
-        send_outputs();
+        if(strlen(payload) == 1)
+            send_outputs();
+        else
+            send_ack('4');
         break;
 
     case 'C':
@@ -150,17 +157,21 @@ int calculate_checksum(const char *frame, int length) {
  * @param error_code Error code to send in the acknowledgment frame
  */
 void send_ack(char error_code) {
-    char ack_frame[] = "!MZO0####";
-    
-    ack_frame[4] = error_code; // Error code
-    int checksum = calculate_checksum(ack_frame, strlen(ack_frame) - 4);
-    //printk("Checksum: %d\n", checksum);
-    ack_frame[5] = '0' + (checksum / 100); // Hundreds place
-    ack_frame[6] = '0' + ((checksum / 10) % 10); // Tens place
-    ack_frame[7] = '0' + (checksum % 10); // Units place
+    static char ack_frame[20]; // Ensure a static buffer is used
+    snprintf(ack_frame, sizeof(ack_frame), "!MZO%c000#", error_code);
 
-    uart_tx(uart, ack_frame, strlen(ack_frame), SYS_FOREVER_MS); // Send acknowledgment frame (SYS_FOREVER_MS -> block until the frame is sent)
+    int checksum = calculate_checksum(ack_frame, strlen(ack_frame) - 4);
+    ack_frame[5] = '0' + (checksum / 100);
+    ack_frame[6] = '0' + ((checksum / 10) % 10);
+    ack_frame[7] = '0' + (checksum % 10);
+    ack_frame[8] = '\0'; // Null-terminate explicitly
+
+    int ret = uart_tx(uart, ack_frame, strlen(ack_frame), SYS_FOREVER_MS);
+    if (ret != 0) {
+        printk("UART TX failed with error: %d\n", ret);
+    }
 }
+
 
 /**
  * Set the state of an LED.
@@ -194,7 +205,7 @@ bool validate_led_states(const char *payload) {
  * Send the current state of the buttons over UART.
  */
 void send_inputs() {
-    char input_frame[] = "!Mi0000####";
+    static char input_frame[] = "!Mi0000####";
     input_frame[3] = '0' + rtdb.button0;
     input_frame[4] = '0' + rtdb.button1;
     input_frame[5] = '0' + rtdb.button2;
@@ -206,14 +217,18 @@ void send_inputs() {
     input_frame[8] = '0' + ((checksum / 10) % 10); // Tens place
     input_frame[9] = '0' + (checksum % 10); // Units place
 
-    uart_tx(uart, input_frame, strlen(input_frame), SYS_FOREVER_MS);
+    int err = uart_tx(uart, input_frame, strlen(input_frame), SYS_FOREVER_MS);
+    if (err) {
+        printk("uart_tx() error. Error code:%d\n\r",err);
+        return;
+    }
 }
 
 /**
  * Send the current state of the LEDs over UART.
  */
 void send_outputs() {
-    char output_frame[] = "!Me0000####";
+    static char output_frame[] = "!Me0000####";
     output_frame[3] = '0' + rtdb.led0;
     output_frame[4] = '0' + rtdb.led1;
     output_frame[5] = '0' + rtdb.led2;
@@ -225,7 +240,11 @@ void send_outputs() {
     output_frame[8] = '0' + ((checksum / 10) % 10); // Tens place
     output_frame[9] = '0' + (checksum % 10); // Units place
 
-    uart_tx(uart, output_frame, strlen(output_frame), SYS_FOREVER_MS);
+    int err = uart_tx(uart, output_frame, strlen(output_frame), SYS_FOREVER_MS);
+    if (err) {
+        printk("uart_tx() error. Error code:%d\n\r",err);
+        return;
+    }
 }
 
 
