@@ -1,0 +1,11 @@
+tests:
+  unit.stbs.test_stb_scheduler:
+    tags: stbs
+    type: unit
+    timeout: 60
+    platform_allow:
+      - native_posix
+      
+    toolchain_allow:
+      - zephyr
+      - gnuarmemb

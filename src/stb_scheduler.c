@@ -1,6 +1,6 @@
 
-#include "../definitions/stb_scheduler.h"
-#include "../implementations/functions.c"
+#include "../include/stb_scheduler.h"
+#include "../include/functions.h"
 
 #include <stdlib.h>
 
@@ -219,3 +219,22 @@ void STBS_print_content() {
 void STBS_destroy(){
 
 }
+
+
+// testing functions
+int STBS_GetNumTasks(void) {
+    return stbs.num_tasks;
+}
+
+int STBS_GetTickMs(void) {
+    return stbs.tick_ms;
+}
+
+const Task* STBS_GetTaskTable(void) {
+    return stbs.task_table;
+}
+
+int STBS_GetMacroCycle(void) {
+    return stbs.macro_cycle;
+}
+
