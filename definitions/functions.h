@@ -14,7 +14,7 @@ typedef struct {
     int next_activation;         // Tick count for the next activation of the task
     int priority;                // Priority level of the thread (lower values = higher priority in Zephyr)
     int exec_time;              // execution time in ms
-    int to_be_executed;         // flag that says if the task was supposed to be executed in a previous tick, but it didnt have space available
+    int to_be_executed;         // flag that says if the task was supposed to be executed in a previous tick, but it didnt have enough time left
     char *name;
 } Task;
 

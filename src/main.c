@@ -58,8 +58,14 @@ const struct device *uart= DEVICE_DT_GET(DT_NODELABEL(uart0));
  * Process a frame received over UART.
  * @param frame Frame to process
  * @param frame_length Length of the frame
+ * @param checksum Checksum of the frame
  */
 void process_frame(const char *frame, int frame_length, int checksum) {
+
+    if(!strcmp(frame,"!PO13#")){
+        frame = "!PO53#";      // change a character to simulate corrupted data 
+        // printk("new frame: %s\n",frame);
+    }
     // Validate frame structure
     if (frame[0] != '!' || frame[frame_length - 1] != '#') {
         send_ack('4'); // Frame structure error
@@ -74,7 +80,7 @@ void process_frame(const char *frame, int frame_length, int checksum) {
     // Calculate and validate checksum!
     int received_checksum = checksum;
     //printk("Received checksum: %d\n", received_checksum);
-    //printk("Calculated checksum: %d\n", calculate_checksum(frame, frame_length - 1));
+    printk("Received checksum: %d  Calculated checksum: %d\n", received_checksum,calculate_checksum(frame, frame_length - 1));
     if (calculate_checksum(frame, frame_length - 1) != received_checksum) {
         send_ack('3'); // Checksum error
         return;
@@ -93,7 +99,7 @@ void process_frame(const char *frame, int frame_length, int checksum) {
         break;
 
     case 'A': // Set all LEDs (atomic operation)
-        if (strlen(payload) >= 4 && validate_led_states(payload)) {
+        if (strlen(payload) == 5 && validate_led_states(payload)) {
             for (int i = 0; i < 4; i++) {
                 set_led(i, payload[i] - '0');
             }
@@ -109,6 +115,10 @@ void process_frame(const char *frame, int frame_length, int checksum) {
 
     case 'E': // Read digital outputs
         send_outputs();
+        break;
+
+    case 'C':
+        rtdb.led0 = -1;
         break;
 
     default:
@@ -140,13 +150,13 @@ void send_ack(char error_code) {
     char ack_frame[] = "!MZO0####";
     
     ack_frame[4] = error_code; // Error code
-    int checksum = calculate_checksum(ack_frame, sizeof(ack_frame) - 4);
+    int checksum = calculate_checksum(ack_frame, strlen(ack_frame) - 4);
     //printk("Checksum: %d\n", checksum);
     ack_frame[5] = '0' + (checksum / 100); // Hundreds place
     ack_frame[6] = '0' + ((checksum / 10) % 10); // Tens place
     ack_frame[7] = '0' + (checksum % 10); // Units place
 
-    uart_tx(uart, ack_frame, sizeof(ack_frame), SYS_FOREVER_MS);
+    uart_tx(uart, ack_frame, strlen(ack_frame), SYS_FOREVER_MS);
 }
 
 /**
@@ -188,12 +198,12 @@ void send_inputs() {
     input_frame[6] = '0' + rtdb.button3;
 
     // Update checksum
-    int checksum = calculate_checksum(input_frame, sizeof(input_frame) - 4);
+    int checksum = calculate_checksum(input_frame, strlen(input_frame) - 4);
     input_frame[7] = '0' + (checksum / 100); // Hundreds place
     input_frame[8] = '0' + ((checksum / 10) % 10); // Tens place
     input_frame[9] = '0' + (checksum % 10); // Units place
 
-    uart_tx(uart, input_frame, sizeof(input_frame), SYS_FOREVER_MS);
+    uart_tx(uart, input_frame, strlen(input_frame), SYS_FOREVER_MS);
 }
 
 /**
@@ -207,19 +217,19 @@ void send_outputs() {
     output_frame[6] = '0' + rtdb.led3;
 
     // Update checksum
-    int checksum = calculate_checksum(output_frame, sizeof(output_frame) - 4);
+    int checksum = calculate_checksum(output_frame, strlen(output_frame) - 4);
     output_frame[7] = '0' + (checksum / 100); // Hundreds place
     output_frame[8] = '0' + ((checksum / 10) % 10); // Tens place
     output_frame[9] = '0' + (checksum % 10); // Units place
 
-    uart_tx(uart, output_frame, sizeof(output_frame), SYS_FOREVER_MS);
+    uart_tx(uart, output_frame, strlen(output_frame), SYS_FOREVER_MS);
 }
 
 
 /************************** UART ******************************/
 
-static uint8_t tx_buf[] =   {"nRF Connect SDK Fundamentals Course\r\n"
-                             "Press 1-3 on your keyboard to toggle LEDS 1-3 on your development kit\r\n"};
+// static uint8_t tx_buf[] =   {"nRF Connect SDK Fundamentals Course\r\n"
+//                             "Press 1-3 on your keyboard to toggle LEDS 1-3 on your development kit\r\n"};
 
 static uint8_t rx_buf[RECEIVE_BUFF_SIZE] = {0};
 static char buffer[INPUT_BUFFER_SIZE];
@@ -232,19 +242,21 @@ static void uart_cb(const struct device *dev, struct uart_event *evt, void *user
     case UART_RX_RDY:
         for (size_t i = 0; i < evt->data.rx.len; i++) {
             char received_char = evt->data.rx.buf[evt->data.rx.offset + i];
-            if (buffer_idx == 0 && received_char == '!') { // Start of frame
-                frame_idx = 0;
+            if (frame_idx == 0 && received_char == '!') { // Start of frame
                 memset(frame_buffer, 0, INPUT_BUFFER_SIZE);
-                //printk("%c", received_char);
+                frame_buffer[frame_idx++] = received_char;
+                printk("%c", received_char);
             }
-            printk("%c", received_char);
-            frame_buffer[frame_idx++] = received_char;
-            if (received_char == '#' && frame_idx > 1) { // End of frame
-                printk("\n");
-                // put the checksum in the buffer before the '#'
-                int checksum = calculate_checksum(frame_buffer, frame_idx - 1);
-                process_frame(frame_buffer, frame_idx, checksum); // Process the frame
-                frame_idx = 0;
+            else if(frame_idx>0) {
+                printk("%c", received_char);
+                frame_buffer[frame_idx++] = received_char;
+                if (received_char == '#') { // End of frame
+                    printk("\n");
+                    // put the checksum in the buffer before the '#'
+                    int checksum = calculate_checksum(frame_buffer, frame_idx - 1);
+                    process_frame(frame_buffer, frame_idx, checksum); // Process the frame
+                    frame_idx = 0;
+                }
             }
         }
         break;
@@ -274,7 +286,7 @@ extern const k_tid_t thread0,thread1,thread2,thread3;
 
 /**
  * Task 0: Periodic task with period 1 tick
- * this task is responsible for reading the button states and updating the led states
+ * this task is responsible for updating the RTDB with the button states
  */
 void task0(void *argA, void *argB, void *argC) {
     // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
@@ -298,7 +310,7 @@ void task0(void *argA, void *argB, void *argC) {
 
 /**
  * Task 1: Periodic task with period 2 ticks
- * this task is responsible for updating the led states based on the button states
+ * this task is responsible for updating the led states based on the button states from the RTDB
  */
 void task1(void *argA, void *argB, void *argC) {
     // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
@@ -328,17 +340,24 @@ void task1(void *argA, void *argB, void *argC) {
         prev_button2 = rtdb.button2;
         prev_button3 = rtdb.button3;
 
-
         // k_msleep(TICK_MS); // Simulate work
     }
 }
 
+// Validate rtdb entries and reset them if they are corrupted
 void task2(void *argA, void *argB, void *argC) {
     // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
     while (1) {
         k_thread_suspend(thread2);
-        
+        if(rtdb.button0 != 0 && rtdb.button0 != 1) {rtdb.button0 = 0; printk("corrupted data\n");}
+        if(rtdb.button1 != 0 && rtdb.button1 != 1) {rtdb.button1 = 0; printk("corrupted data\n");}
+        if(rtdb.button2 != 0 && rtdb.button2 != 1) {rtdb.button2 = 0; printk("corrupted data\n");}
+        if(rtdb.button3 != 0 && rtdb.button3 != 1) {rtdb.button3 = 0; printk("corrupted data\n");}
 
+        if(rtdb.led0 != 0 && rtdb.led0 != 1) {rtdb.led0 = 0; printk("corrupted data\n");}
+        if(rtdb.led1 != 0 && rtdb.led1 != 1) {rtdb.led1 = 0; printk("corrupted data\n");}
+        if(rtdb.led2 != 0 && rtdb.led2 != 1) {rtdb.led2 = 0; printk("corrupted data\n");}
+        if(rtdb.led3 != 0 && rtdb.led3 != 1) {rtdb.led3 = 0; printk("corrupted data\n");}
 
 
         // k_msleep(TICK_MS); // Simulate work
@@ -359,13 +378,13 @@ void task3(void *argA, void *argB, void *argC) {
 */
 K_THREAD_DEFINE(thread0 , 512, task0, NULL, NULL, NULL,5,0,0);
 K_THREAD_DEFINE(thread1, 512, task1, NULL, NULL, NULL,5,0,0);
-K_THREAD_DEFINE(thread2, 512, task2, NULL, NULL, NULL,5,0,0);
+K_THREAD_DEFINE(thread2, 512, task2, NULL, NULL, NULL,1,0,0);
 K_THREAD_DEFINE(thread3, 512, task3, NULL, NULL, NULL,5,0,0);
 
 /**
  * Main function demonstrating the Static Table-Based Scheduler (STBS).
  */
-void main(void) {
+int main(void) {
     printk("Zephyr STBS Example\n");
 
     uint8_t msg[INPUT_BUFFER_SIZE];
@@ -432,7 +451,7 @@ void main(void) {
 	// 	return 1;
 	// }
 	/* Start receiving by calling uart_rx_enable() and pass it the address of the receive buffer */
-	ret = uart_rx_enable(uart ,rx_buf,sizeof rx_buf,RECEIVE_TIMEOUT);
+	ret = uart_rx_enable(uart ,rx_buf,sizeof(rx_buf),RECEIVE_TIMEOUT);
 	if (ret) {
 		return 1;
 	}
@@ -453,7 +472,7 @@ void main(void) {
 
     STBS_AddTask(1, thread0, 1,20,"thread0"); // Task 1: Period = 1 ticks
     STBS_AddTask(2, thread1, 1,20,"thread1"); // Task 2: Period = 2 tick
-    STBS_AddTask(3, thread2, 1,20,"thread2"); // Task 3: Period = 3 ticks
+    STBS_AddTask(1, thread2, 1,20,"thread2"); // Task 3: Period = 3 ticks
 
     // STBS_AddTask(1, thread0, 10,40,"thread0"); // Task 1: Period = 1 ticks
     // STBS_AddTask(3, thread2, 5,50,"thread2"); // Task 3: Period = 3 ticks
@@ -463,4 +482,5 @@ void main(void) {
     // STBS_print_content();
     // Start the scheduler
     STBS_Start();
+    return 0;
 }
