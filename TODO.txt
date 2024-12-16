@@ -3,9 +3,9 @@
 [x] Traduzir as funcionalidades do STBS para o kernel do zephyr
 [x] Fazer o scheduler tendo em conta as prioridades e os tempos de execução
 [x] Buttons
-[] Comunição UART->PC
-[]
-[]
+[x] Comunição UART->PC
+[] Unit tests
+[] Mais tasks
 []
 []
 []

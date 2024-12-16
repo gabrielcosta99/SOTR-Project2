@@ -27,4 +27,11 @@ void STBS_AddTask(int ticks, k_tid_t task_id, int priority, int execution_time, 
 void STBS_print_content();
 void STBS_Start();
 
+// for testing
+int STBS_GetNumTasks(void);
+int STBS_GetTickMs(void);
+const Task* STBS_GetTaskTable(void);
+int STBS_GetMacroCycle(void);
+
+
 #endif

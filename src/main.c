@@ -19,9 +19,10 @@
 
 
 // helper functions
-#include "../implementations/stb_scheduler.c"
-#include "../implementations/RTDB.c"
-#include "../definitions/frames.h"
+#include "../include/functions.h"
+#include "../include/stb_scheduler.h"
+#include "../include/frames.h"
+#include "../include/rtdb.h"
 
 // GLOBAL
 
@@ -58,6 +59,7 @@ const struct device *uart= DEVICE_DT_GET(DT_NODELABEL(uart0));
  * Process a frame received over UART.
  * @param frame Frame to process
  * @param frame_length Length of the frame
+ * @param checksum Checksum of the frame
  * @param checksum Checksum of the frame
  */
 void process_frame(const char *frame, int frame_length, int checksum) {
@@ -99,6 +101,7 @@ void process_frame(const char *frame, int frame_length, int checksum) {
         break;
 
     case 'A': // Set all LEDs (atomic operation)
+
         if (strlen(payload) == 5 && validate_led_states(payload)) {
             for (int i = 0; i < 4; i++) {
                 set_led(i, payload[i] - '0');
@@ -156,7 +159,7 @@ void send_ack(char error_code) {
     ack_frame[6] = '0' + ((checksum / 10) % 10); // Tens place
     ack_frame[7] = '0' + (checksum % 10); // Units place
 
-    uart_tx(uart, ack_frame, strlen(ack_frame), SYS_FOREVER_MS);
+    uart_tx(uart, ack_frame, strlen(ack_frame), SYS_FOREVER_MS); // Send acknowledgment frame (SYS_FOREVER_MS -> block until the frame is sent)
 }
 
 /**

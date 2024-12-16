@@ -1,4 +1,4 @@
-#include "../definitions/rtdb.h"
+#include "../include/rtdb.h"
 #include <string.h>
 
 #define COMMANDS {"!PO11#", "!PO10#", "!PO21#", "!PO20#", "!PO31#", "!PO30#", "!PO41#", "!PO40#"}
