@@ -5,7 +5,7 @@
 [x] Buttons
 [x] Comunição UART->PC
 [] Unit tests
-[] Mais tasks
+[x] Mais tasks
 []
 []
 []

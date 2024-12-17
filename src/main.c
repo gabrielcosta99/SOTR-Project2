@@ -6,6 +6,7 @@
  * The scheduler uses a static table to manage tasks and activates them periodically.
  */
 
+#include <sys/_intsup.h>
 #include <zephyr/kernel.h>
 #include <zephyr/kernel/thread_stack.h>
 #include <zephyr/sys/printk.h>
@@ -82,8 +83,8 @@ void process_frame(const char *frame, int frame_length, int checksum) {
     // Calculate and validate checksum!
     int received_checksum = checksum;
     //printk("Received checksum: %d\n", received_checksum);
-    // printk("Received checksum: %d  Calculated checksum: %d\n", received_checksum,calculate_checksum(frame, frame_length - 1));
     if (calculate_checksum(frame, frame_length - 1) != received_checksum) {
+        printk("Received checksum: %d  Calculated checksum: %d\n", received_checksum,calculate_checksum(frame, frame_length - 1));
         send_ack('3'); // Checksum error
         return;
     }
@@ -148,6 +149,7 @@ int calculate_checksum(const char *frame, int length) {
     int checksum = 0;
     for (int i = 1; i < length; i++) {
         checksum += frame[i];
+      
     }
     return checksum % 1000; // Return last 3 digits
 }
@@ -164,8 +166,7 @@ void send_ack(char error_code) {
     ack_frame[5] = '0' + (checksum / 100);
     ack_frame[6] = '0' + ((checksum / 10) % 10);
     ack_frame[7] = '0' + (checksum % 10);
-    ack_frame[8] = '\0'; // Null-terminate explicitly
-
+    
     int ret = uart_tx(uart, ack_frame, strlen(ack_frame), SYS_FOREVER_MS);
     if (ret != 0) {
         printk("UART TX failed with error: %d\n", ret);
@@ -300,7 +301,7 @@ static void uart_cb(const struct device *dev, struct uart_event *evt, void *user
 /************************** THREADS ******************************/
 
 // Configuration constants
-#define TICK_MS 200          // Scheduler tick period in milliseconds
+#define TICK_MS 50          // Scheduler tick period in milliseconds
 #define MAX_TASKS 15
 
 extern const k_tid_t thread0,thread1,thread2,thread3;
@@ -313,7 +314,10 @@ extern const k_tid_t thread0,thread1,thread2,thread3;
 void task0(void *argA, void *argB, void *argC) {
     // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
     while (1) {
+        
         k_thread_suspend(thread0);
+        int timer1 = k_uptime_get();
+        // printk("T0->timer1: %d\n",timer1);
         gpio_pin_set_dt(&led0,rtdb.led0);
         gpio_pin_set_dt(&led1,rtdb.led1);
         gpio_pin_set_dt(&led2,rtdb.led2);
@@ -323,6 +327,10 @@ void task0(void *argA, void *argB, void *argC) {
         rtdb.button1 = gpio_pin_get_dt(&button1); // Read button1 state
         rtdb.button2 = gpio_pin_get_dt(&button2); // Read button2 state
         rtdb.button3 = gpio_pin_get_dt(&button3); // Read button3 state
+    
+        int timer2 = k_uptime_get();
+        // printk("T0->timer2: %d\n",timer2);
+        // printk("Task0 execution time: %d\n",timer2-timer1);
         // RT_db_print(&rtdb);
         // gpio_pin_set_dt(&led3,rtdb.led3);
         // printk("Task0 executing %d\n",thread0); // Simulate task behavior
@@ -342,7 +350,8 @@ void task1(void *argA, void *argB, void *argC) {
     static int prev_button3 = 0;
     while (1) {
         k_thread_suspend(thread1);
-        
+        int timer1 = k_uptime_get();
+        // printk("T1->timer1: %d\n",timer1);
         // based on the button state,change the led state once
         if(rtdb.button0 == 1 && prev_button0 == 0){
             rtdb.led0 = !rtdb.led0;
@@ -362,6 +371,10 @@ void task1(void *argA, void *argB, void *argC) {
         prev_button2 = rtdb.button2;
         prev_button3 = rtdb.button3;
 
+        int timer2 = k_uptime_get();
+        // printk("T1->timer2: %d\n",timer2);
+        // printk("Task1 execution time: %d\n",timer2-timer1);
+
         // k_msleep(TICK_MS); // Simulate work
     }
 }
@@ -371,6 +384,9 @@ void task2(void *argA, void *argB, void *argC) {
     // k_tid_t task_id = *(k_tid_t *)id_ptr; // Retrieve task ID
     while (1) {
         k_thread_suspend(thread2);
+
+        int timer1 = k_uptime_get();
+        // printk("T2->timer1: %d\n",timer1);
         if(rtdb.button0 != 0 && rtdb.button0 != 1) {rtdb.button0 = 0; printk("corrupted data\n");}
         if(rtdb.button1 != 0 && rtdb.button1 != 1) {rtdb.button1 = 0; printk("corrupted data\n");}
         if(rtdb.button2 != 0 && rtdb.button2 != 1) {rtdb.button2 = 0; printk("corrupted data\n");}
@@ -380,7 +396,9 @@ void task2(void *argA, void *argB, void *argC) {
         if(rtdb.led1 != 0 && rtdb.led1 != 1) {rtdb.led1 = 0; printk("corrupted data\n");}
         if(rtdb.led2 != 0 && rtdb.led2 != 1) {rtdb.led2 = 0; printk("corrupted data\n");}
         if(rtdb.led3 != 0 && rtdb.led3 != 1) {rtdb.led3 = 0; printk("corrupted data\n");}
-
+        int timer2 = k_uptime_get();
+        // printk("T2->timer1: %d\n",timer2);
+        // printk("Task2 execution time: %d\n",timer2-timer1);
 
         // k_msleep(TICK_MS); // Simulate work
     }
@@ -492,9 +510,9 @@ int main(void) {
     // STBS_AddTask(2, thread1, 1,160,"thread1"); // Task 2: Period = 2 tick
     // STBS_AddTask(2, thread3, 1,40,"thread3"); // Task 2: Period = 2 tick
 
-    STBS_AddTask(1, thread0, 1,20,"thread0"); // Task 1: Period = 1 ticks
-    STBS_AddTask(2, thread1, 1,20,"thread1"); // Task 2: Period = 2 tick
-    STBS_AddTask(1, thread2, 1,20,"thread2"); // Task 3: Period = 3 ticks
+    STBS_AddTask(1, thread0, 1,3,"thread0"); // Task 1: Period = 1 ticks
+    STBS_AddTask(2, thread1, 2,3,"thread1"); // Task 2: Period = 2 tick
+    STBS_AddTask(2, thread2, 1,3,"thread2"); // Task 3: Period = 3 ticks
 
     // STBS_AddTask(1, thread0, 10,40,"thread0"); // Task 1: Period = 1 ticks
     // STBS_AddTask(3, thread2, 5,50,"thread2"); // Task 3: Period = 3 ticks
