@@ -11,6 +11,8 @@
 #include <zephyr/kernel/thread_stack.h>
 #include <zephyr/sys/printk.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include "zephyr/kernel/thread.h"
 #include <zephyr/timing/timing.h>   /* for timing services */
 #include <zephyr/device.h>
@@ -24,6 +26,7 @@
 #include "../include/stb_scheduler.h"
 #include "../include/frames.h"
 #include "../include/rtdb.h"
+#include "zephyr/sys/sys_io.h"
 
 // GLOBAL
 
@@ -63,28 +66,34 @@ const struct device *uart= DEVICE_DT_GET(DT_NODELABEL(uart0));
  * @param checksum Checksum of the frame
  * @param checksum Checksum of the frame
  */
-void process_frame(const char *frame, int frame_length, int checksum) {
+void process_frame(const char *frame, int frame_length) {
 
     if(!strcmp(frame,"!PO13#")){
         frame = "!PO53#";      // change a character to simulate corrupted data 
         // printk("new frame: %s\n",frame);
     }
     // Validate frame structure
-    if (frame[0] != '!' || frame[frame_length - 1] != '#') {
+    if (frame_length < 5 || frame[0] != '!' || frame[frame_length - 1] != '#' ||
+        !isdigit(frame[frame_length - 4]) ||
+        !isdigit(frame[frame_length - 3]) ||
+        !isdigit(frame[frame_length - 2])) {
         send_ack('4'); // Frame structure error
         return;
     }
 
+
     // Extract command and payload
     char device_id = frame[1];
     char command = frame[2];
-    const char *payload = &frame[3];
 
+    const char *checksum = &frame[frame_length - 4];
+
+    
+    int received_checksum = atoi(checksum);
     // Calculate and validate checksum!
-    int received_checksum = checksum;
-    //printk("Received checksum: %d\n", received_checksum);
-    if (calculate_checksum(frame, frame_length - 1) != received_checksum) {
-        printk("Received checksum: %d  Calculated checksum: %d\n", received_checksum,calculate_checksum(frame, frame_length - 1));
+
+    if (calculate_checksum(frame, frame_length-4) != received_checksum) {
+        printk("Received checksum: %d  Calculated checksum: %d\n", received_checksum,calculate_checksum(frame, frame_length - 4));
         send_ack('3'); // Checksum error
         return;
     }
@@ -92,10 +101,11 @@ void process_frame(const char *frame, int frame_length, int checksum) {
     // Process command
     switch (command) {
     case 'O': // Set individual LED
-        if (strlen(payload) == 3 &&
-            payload[0] >= '1' && payload[0] <= '4' && 
-            (payload[1] == '0' || payload[1] == '1')) {
-            set_led(payload[0] - '1', payload[1] - '0');
+        char payloadA[2];
+        memcpy(payloadA, &frame[3], frame_length - 7);
+        if (payloadA[0] >= '1' && payloadA[0] <= '4' &&
+            (payloadA[1] == '0' || payloadA[1] == '1')) {
+            set_led(payloadA[0]-'0', payloadA[1]-'0');
             send_ack('1'); // Acknowledge success
         } else {
             send_ack('4'); // Invalid payload
@@ -103,10 +113,12 @@ void process_frame(const char *frame, int frame_length, int checksum) {
         break;
 
     case 'A': // Set all LEDs (atomic operation)
-
-        if (strlen(payload) == 5 && validate_led_states(payload)) {
+        char payloadB [4];
+        memcpy(payloadB, &frame[3], frame_length - 7);  
+        
+        if (validate_led_states(payloadB)) {
             for (int i = 0; i < 4; i++) {
-                set_led(i, payload[i] - '0');
+                set_led(i, payloadB[i]-'0');
             }
             send_ack('1'); // Acknowledge success
         } else {
@@ -115,17 +127,11 @@ void process_frame(const char *frame, int frame_length, int checksum) {
         break;
 
     case 'I': // Read digital inputs
-        if (strlen(payload)  == 1)
-            send_inputs();
-        else
-            send_ack('4'); // Invalid payload
+        send_inputs();
         break;
 
     case 'E': // Read digital outputs
-        if(strlen(payload) == 1)
-            send_outputs();
-        else
-            send_ack('4');
+        send_outputs();
         break;
 
     case 'C':
@@ -149,7 +155,7 @@ int calculate_checksum(const char *frame, int length) {
     int checksum = 0;
     for (int i = 1; i < length; i++) {
         checksum += frame[i];
-      
+    
     }
     return checksum % 1000; // Return last 3 digits
 }
@@ -276,8 +282,9 @@ static void uart_cb(const struct device *dev, struct uart_event *evt, void *user
                 if (received_char == '#') { // End of frame
                     printk("\n");
                     // put the checksum in the buffer before the '#'
-                    int checksum = calculate_checksum(frame_buffer, frame_idx - 1);
-                    process_frame(frame_buffer, frame_idx, checksum); // Process the frame
+                    // int checksum = calculate_checksum(frame_buffer, frame_idx - 1);
+
+                    process_frame(frame_buffer, frame_idx); // Process the frame
                     frame_idx = 0;
                 }
             }
