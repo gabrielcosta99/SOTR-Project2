@@ -105,7 +105,7 @@ void process_frame(const char *frame, int frame_length) {
         memcpy(payloadA, &frame[3], frame_length - 7);
         if (payloadA[0] >= '1' && payloadA[0] <= '4' &&
             (payloadA[1] == '0' || payloadA[1] == '1')) {
-            set_led(payloadA[0]-'0', payloadA[1]-'0');
+            set_led(payloadA[0]-'1', payloadA[1]-'0');
             send_ack('1'); // Acknowledge success
         } else {
             send_ack('4'); // Invalid payload
