@@ -109,35 +109,33 @@ int main(void) {
     STBS_Init(TICK_MS,MAX_TASKS);
 
     // Add tasks with different periods
-    // STBS_AddTask(1, thread0, 1,10,"thread0"); // Task 1: Period = 1 ticks
-    // STBS_AddTask(3, thread2, 1,30,"thread2"); // Task 3: Period = 3 ticks
-    // STBS_AddTask(2, thread1, 1,40,"thread1"); // Task 2: Period = 2 tick
-    // STBS_AddTask(2, thread3, 1,10,"thread3"); // Task 2: Period = 2 tick
+    STBS_AddTask(1, thread0, 1,10,"thread0"); // Task 1: Period = 1 ticks
+    STBS_AddTask(3, thread2, 1,30,"thread2"); // Task 3: Period = 3 ticks
+    STBS_AddTask(2, thread1, 1,40,"thread1"); // Task 2: Period = 2 tick
+    STBS_AddTask(2, thread3, 1,10,"thread3"); // Task 2: Period = 2 tick
 
-    // STBS_AddTask(1, thread0, 1,3,"thread0"); // Task 1: Period = 1 ticks
-    // STBS_AddTask(2, thread1, 2,3,"thread1"); // Task 2: Period = 2 tick
-    // STBS_AddTask(2, thread2, 1,3,"thread2"); // Task 3: Period = 3 ticks
-
+    // SCHEDULABLE
     // STBS_AddTask(1, thread0, 10,10,"thread0"); // Task 1: Period = 1 ticks
     // STBS_AddTask(3, thread2, 5,12,"thread2"); // Task 3: Period = 3 ticks
     // STBS_AddTask(2, thread1, 7,15,"thread1"); // Task 2: Period = 2 tick
     // STBS_AddTask(2, thread3, 2,7,"thread3"); // Task 2: Period = 2 tick
 
-    // NAO DEVIA SER SCHEDULABLE
+    // NOT SCHEDULABLE
     // STBS_AddTask(1, thread0, 10,20,"thread0"); // Task 1: Period = 1 ticks
     // STBS_AddTask(3, thread2, 5,25,"thread2"); // Task 3: Period = 3 ticks
     // STBS_AddTask(2, thread1, 7,30,"thread1"); // Task 2: Period = 2 tick
     // STBS_AddTask(2, thread3, 2,15,"thread3"); // Task 2: Period = 2 tick
 
+    // NOT SCHEDULABLE
     // STBS_AddTask(1, thread0, 1,20,"thread0"); // Task 1: Period = 1 ticks
     // STBS_AddTask(3, thread2, 5,25,"thread2"); // Task 3: Period = 3 ticks
     // STBS_AddTask(2, thread1, 7,30,"thread1"); // Task 2: Period = 2 tick
     // STBS_AddTask(2, thread3, 2,15,"thread3"); // Task 2: Period = 2 tick
 
 
-    STBS_AddTask(2, thread0, 1,50,"thread0"); // Task 1: Period = 1 ticks
-    STBS_AddTask(4, thread1, 2,50,"thread1"); // Task 3: Period = 2 ticks
-    STBS_AddTask(6, thread2, 3,50,"thread2"); // Task 2: Period = 3 tick
+    // STBS_AddTask(2, thread0, 1,50,"thread0"); // Task 1: Period = 1 ticks
+    // STBS_AddTask(4, thread1, 2,50,"thread1"); // Task 3: Period = 2 ticks
+    // STBS_AddTask(6, thread2, 3,50,"thread2"); // Task 2: Period = 3 tick
 
     
 
