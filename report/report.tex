@@ -118,7 +118,7 @@ Each task in the system is assigned a specific priority and a period to ensure t
 
 \subsection{Execution Patterns and Relevant Events}
 % \textbf{RTDB Operations}: The RTDB is critical for data synchronization:
-% TALVEZ POR AQUI UMA PRINT DA TABELA GERADA PELO STBS_START
+% TALVEZ POR AQUI UMA PRINT DA TABELA GERADA PELO STBS_START ---- YES
 The RTDB is critical for data synchronization:
 \begin{itemize}
     \item \textbf{Task 0} writes to the RTDB, while \textbf{Task 1} and \textbf{Task 2} read from it.
@@ -130,7 +130,7 @@ The RTDB is critical for data synchronization:
 \subsection{System Performance}
 %Placeholder: Analyze the overhead introduced by the scheduler and discuss its efficiency.
 
-%REVIEW THIS
+%todo - REVIEW THIS
 \subsection{System Schedulability}
 To confirm that all tasks meet their deadlines, we perform a schedulability analysis using the system's utilization factor.
 
@@ -141,6 +141,13 @@ U = \sum_{i=1}^n \frac{C_i}{T_i}
 \]
 
 where \( C_i \) is the computation time and \( T_i \) is the period of each task. Assuming each task completes within its assigned period, this calculation helps ensure that the system remains schedulable.
+
+For the tasks in our system, the utilization factor is calculated as follows:
+
+%TODO - check if this is correct, i don't if it should be in ticks or ms, also i don't remenber the computation time of each task
+\[
+U = \frac{20}{50} + \frac{25}{100} + \frac{30}{100} = 0.95 
+\]
 
 % \subsection{Relevant Events and Inter-Task Communication}
 % \textbf{RTDB Operations}: The RTDB is critical for data synchronization:
@@ -159,7 +166,9 @@ In order for the computer to communicate with the Microcontroller, we implemente
 In our implementation, every time a command is completed (the user typed the character "\#") the command is processed and executed (if prompted correctly), and the respective acknowledge is sent back as a response.
 
 %POMOS ESTE TEXTO ABAIXO OU N?
-We understand that we shouldn't be processing the command inside the UART interrupt function, however, the processing is rather fast and doesn't add much overhead to the execution of the other tasks. % ADD THE PROCESSING TIME HERE
+% We understand that we shouldn't be processing the command inside the UART interrupt function, however, the processing is rather fast and doesn't add much overhead to the execution of the other tasks. % ADD THE PROCESSING TIME HERE
+% acho qql assim fica melhor
+For this particular use-case,and project, we decided to process the command inside the UART interrupt function meaning that we assume that the overhead is close to 0, however, we understand that this is not the best practice, since it can add overhead to the execution of the other tasks.
 
 \section{Tests}
 The tests for the scheduler verify that tasks are added correctly and meet their deadlines. The test suite includes the following.
@@ -174,7 +183,7 @@ The tests for the scheduler verify that tasks are added correctly and meet their
 When testing the scheduler, we noticed that it wasn't detecting when the tasks exceeded their deadline, so we had to make some small changes (which are marked in the code with "CHANGED"), namely, adding this condition
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.91\linewidth]{code_change.png}
+    % \includegraphics[width=0.91\linewidth]{code_change.png}
     % \caption{Code change}
     \label{fig:gantt}
 \end{figure}
