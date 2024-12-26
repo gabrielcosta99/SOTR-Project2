@@ -15,6 +15,7 @@ typedef struct {
     int priority;                // Priority level of the thread (lower values = higher priority in Zephyr)
     int exec_time;              // execution time in ms
     int to_be_executed;         // flag that says if the task was supposed to be executed in a previous tick, but it didnt have enough time left
+    int delay_count;            // CHANGED! It counts the number of times a task was put to execute in the next clock cycle
     char *name;
 } Task;
 

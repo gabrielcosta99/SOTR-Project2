@@ -55,6 +55,7 @@ void STBS_AddTask(int ticks, k_tid_t task_id, int priority, int execution_time, 
             stbs.task_table[i].id = task_id;
             stbs.task_table[i].exec_time = execution_time;
             stbs.task_table[i].to_be_executed = 0;
+            stbs.task_table[i].delay_count = 0;         // CHANGED
             stbs.task_table[i].name = name;
             
 
@@ -118,9 +119,12 @@ void STBS_Start() {
                     entry[tick].total_exec_time += stbs.task_table[task_idx].exec_time;
                     entry[tick].num_tasks++;
                     stbs.task_table[task_idx].to_be_executed = 0;
+                    stbs.task_table[task_idx].delay_count = 0;    // CHANGED
                 }
                 else{
-                    if(tick+1 > stbs.macro_cycle){
+                    stbs.task_table[task_idx].delay_count += 1; // CHANGED
+                    if(tick+1 > stbs.macro_cycle 
+                     || stbs.task_table[task_idx].delay_count >= stbs.task_table[task_idx].ticks){ // CHANGED
                         printk("System not schedulable\n");
                         for (int i = 0; i < stbs.macro_cycle; i++) {
                             k_free(entry[i].tasks);

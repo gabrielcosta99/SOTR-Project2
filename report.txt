@@ -1,0 +1,1 @@
+Se uma task for adiada para alem do deadline, o sistema não fica marcado como "not schedulable"
