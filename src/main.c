@@ -431,7 +431,7 @@ K_THREAD_DEFINE(thread3, 512, task3, NULL, NULL, NULL,5,0,0);
 /**
  * Main function demonstrating the Static Table-Based Scheduler (STBS).
  */
-int my_main(void) {
+int main(void) {
     printk("Zephyr STBS Example\n");
 
     uint8_t msg[INPUT_BUFFER_SIZE];
