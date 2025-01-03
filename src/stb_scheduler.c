@@ -144,20 +144,40 @@ void STBS_Start() {
     k_msleep(20); // let the tasks arrive at the point where they suspend themselves
     while(1){
         release_time = k_uptime_get() + stbs.tick_ms;
+        // uint64_t scheduler_start_time = k_uptime_get(); // Start measuring scheduler time
+
         for(int i = 0; i <stbs.macro_cycle;i++){
             current_tick++;
+            // int n_executed_tasks = 0;
+
+            // uint64_t iteration_start_time = k_uptime_get(); // Start timing the iteration
+
             for(int task_idx = 0; task_idx < entry[i].num_tasks; task_idx++){
+                // uint64_t task_start_time = k_uptime_get(); // Time before resuming a task
+
                 k_tid_t task_id = entry[i].tasks[task_idx].id;
                 k_thread_resume(task_id);
+
+                // uint64_t task_end_time = k_uptime_get(); // Time after resuming the task
+                // n_executed_tasks++;
+
+                // // Log task overhead if necessary
+                // printk("Task %d resume time: %llu ms\n", task_idx, task_end_time - task_start_time);
             }
+
+            // uint64_t iteration_end_time = k_uptime_get(); // End timing the iteration
+            // printk("Macro cycle %d iteration overhead: %llu ms\n", i, iteration_end_time - iteration_start_time);
 
             fin_time = k_uptime_get();
             if( fin_time < release_time) {
                 k_msleep(release_time - fin_time);
                 release_time += stbs.tick_ms;
             }
-
         }
+
+        // uint64_t scheduler_end_time = k_uptime_get(); // End measuring scheduler time
+        // printk("Total scheduler overhead for macro cycle: %llu ms\n", scheduler_end_time - scheduler_start_time);
+
         current_tick = 0;
 
         
