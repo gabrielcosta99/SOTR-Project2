@@ -111,9 +111,9 @@ Each task in the system is assigned a specific priority and a period to ensure t
 \subsection{Execution Patterns and Relevant Events}
 The RTDB is critical for data synchronization:
 \begin{itemize}
-    \item \textbf{Task 0} is responsible for updating the RTDB with the current states of the buttons. It reads the states of the buttons and writes these states to the RTDB. This task runs periodically every 50ms.
-    \item \textbf{Task 1} is responsible for updating the LED states based on the button states stored in the RTDB. It reads the button states from the RTDB and updates the LED states accordingly. This task runs periodically every 100ms.
-    \item \textbf{Task 2} is responsible for validating the RTDB entries and resetting them if they are corrupted. It reads the states of the LEDs and buttons from the RTDB and checks for any invalid values. If any invalid values are found, it resets them to a default state. This task runs periodically every 100ms.
+    \item \textbf{Task 0} is responsible for updating the RTDB with the current states of the buttons. It reads the states of the buttons and writes these states to the RTDB. This task runs periodically every 50ms with priority 1.
+    \item \textbf{Task 1} is responsible for updating the LED states based on the button states stored in the RTDB. It reads the button states from the RTDB and updates the LED states accordingly. This task runs periodically every 100ms with priority 2.
+    \item \textbf{Task 2} is responsible for validating the RTDB entries and resetting them if they are corrupted. It reads the states of the LEDs and buttons from the RTDB and checks for any invalid values. If any invalid values are found, it resets them to a default state. This task runs periodically every 100ms with priority 1.
 
     \item Since there aren't multiple tasks trying to write to the RTDB there is no need to implement mutexes or other mechanisms to handle concurrent access.
 \end{itemize}
