@@ -91,22 +91,6 @@ The system is composed by the following tasks:
 
 Each task in the system is assigned a specific priority and a period to ensure timely execution and prevent task starvation. The following table outlines the task priorities and activation periods.
 
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|l|c|c|p{5cm}|}
-        \hline
-        \textbf{Task} & \textbf{Priority} & \textbf{Activation Period} & \textbf{Description} \\
-        \hline
-        Task 0 & 1 & 50ms & Updates the RTDB with the button states. \\
-        \hline
-        Task 1 & 2 & 100ms & Updates the LED states based on the button states from the RTDB. \\
-        \hline
-        Task 2 & 1 & 100ms & Validates RTDB entries and resets them if they are corrupted. \\
-        \hline
-    \end{tabular}
-    \caption{Task Priorities and Activation Periods}
-    \label{tab:task_priorities}
-\end{table}
 
 \subsection{Execution Patterns and Relevant Events}
 The RTDB is critical for data synchronization:
